@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+
+.my-active {
+  color: white !important;
+  background-color: red !important;
+}
