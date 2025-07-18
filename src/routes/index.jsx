@@ -93,7 +93,7 @@ const routes = [
     ],
   },
   {
-    path: "auth",
+    path: "admin/login",
     element: AuthPage,
   },
 ];

@@ -1,171 +1,185 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Form, Input, Button, Card, Typography, message, Space, Row, Col, Divider } from "antd";
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserAddOutlined } from "@ant-design/icons";
 import api from "../../../services/api";
+
+const { Title, Text } = Typography;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   
-  const onSubmit = async (event) => {
-    event.preventDefault();
-    
+  const onFinish = async (values) => {
     try {
       setLoading(true);
-      setError(null);
-      
-      const formData = {
-        taiKhoan: event.target.taiKhoan.value,
-        matKhau: event.target.matKhau.value,
-        email: event.target.email.value,
-        soDt: event.target.soDt.value,
-        maNhom: "GP01", // Sử dụng mã nhóm mặc định
-        hoTen: event.target.hoTen.value
-      };
       
       // Kiểm tra mật khẩu xác nhận
-      if (formData.matKhau !== event.target.confirmPassword.value) {
-        setError("Mật khẩu xác nhận không khớp");
+      if (values.matKhau !== values.confirmPassword) {
+        message.error("Mật khẩu xác nhận không khớp");
         setLoading(false);
         return;
       }
       
-      const result = await api.post("QuanLyNguoiDung/DangKy", formData);
+      const formData = {
+        taiKhoan: values.taiKhoan,
+        matKhau: values.matKhau,
+        email: values.email,
+        soDt: values.soDt,
+        maNhom: "GP01", // Sử dụng mã nhóm mặc định
+        hoTen: values.hoTen
+      };
       
-      // Đăng ký thành công, chuyển hướng đến trang đăng nhập
-      navigate("/login", { 
-        replace: true,
-        state: { message: "Đăng ký thành công. Vui lòng đăng nhập." }
-      });
+      await api.post("QuanLyNguoiDung/DangKy", formData);
+      
+      // Đăng ký thành công
+      message.success("Đăng ký thành công! Vui lòng đăng nhập.");
+      navigate("/login", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.content || "Đã xảy ra lỗi khi đăng ký");
+      message.error(err.response?.data?.content || "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto py-12">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-md">
-        <div className="md:flex">
-          <div className="w-full p-6">
-            <div className="flex justify-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">Đăng ký tài khoản</h1>
+    <div style={{ padding: '40px 20px', maxWidth: 1200, margin: '0 auto' }}>
+      <Row justify="center" align="middle">
+        <Col xs={24} sm={20} md={16} lg={12} xl={10}>
+          <Card 
+            bordered={false} 
+            style={{ 
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+              borderRadius: 8
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <Title level={2}>Đăng ký tài khoản</Title>
+              <Text type="secondary">
+                Tạo tài khoản để đặt vé xem phim và nhận các ưu đãi từ Movie Booking
+              </Text>
             </div>
-            
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-                {error}
-              </div>
-            )}
-            
-            <form onSubmit={onSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="taiKhoan">
-                  Tài khoản
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="taiKhoan"
-                  type="text"
-                  name="taiKhoan"
-                  placeholder="Nhập tài khoản"
-                  required
-                />
-              </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="hoTen">
-                  Họ tên
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="hoTen"
-                  type="text"
-                  name="hoTen"
-                  placeholder="Nhập họ tên"
-                  required
+            <Form
+              form={form}
+              name="register"
+              layout="vertical"
+              onFinish={onFinish}
+              scrollToFirstError
+            >
+              <Form.Item
+                name="taiKhoan"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập tài khoản!' },
+                  { min: 4, message: 'Tài khoản phải có ít nhất 4 ký tự!' },
+                ]}
+              >
+                <Input 
+                  size="large"
+                  prefix={<UserOutlined />} 
+                  placeholder="Tài khoản" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="Nhập email"
-                  required
+              <Form.Item
+                name="hoTen"
+                rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+              >
+                <Input 
+                  size="large"
+                  prefix={<UserAddOutlined />} 
+                  placeholder="Họ tên" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="soDt">
-                  Số điện thoại
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="soDt"
-                  type="text"
-                  name="soDt"
-                  placeholder="Nhập số điện thoại"
-                  required
+              <Form.Item
+                name="email"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập email!' },
+                  { type: 'email', message: 'Email không hợp lệ!' },
+                ]}
+              >
+                <Input 
+                  size="large"
+                  prefix={<MailOutlined />} 
+                  placeholder="Email" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="matKhau">
-                  Mật khẩu
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="matKhau"
-                  type="password"
-                  name="matKhau"
-                  placeholder="Nhập mật khẩu"
-                  required
+              <Form.Item
+                name="soDt"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                  { pattern: /^[0-9]+$/, message: 'Số điện thoại chỉ bao gồm các chữ số!' }
+                ]}
+              >
+                <Input 
+                  size="large"
+                  prefix={<PhoneOutlined />} 
+                  placeholder="Số điện thoại" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
-                  Nhập lại mật khẩu
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="confirmPassword"
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Nhập lại mật khẩu"
-                  required
+              <Form.Item
+                name="matKhau"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                  { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+                ]}
+              >
+                <Input.Password 
+                  size="large"
+                  prefix={<LockOutlined />} 
+                  placeholder="Mật khẩu" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="flex items-center justify-between">
-                <button
-                  className={`w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  type="submit"
-                  disabled={loading}
+              <Form.Item
+                name="confirmPassword"
+                rules={[
+                  { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('matKhau') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password 
+                  size="large"
+                  prefix={<LockOutlined />} 
+                  placeholder="Xác nhận mật khẩu" 
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  size="large"
+                  loading={loading}
+                  style={{ width: '100%' }}
                 >
-                  {loading ? "Đang xử lý..." : "Đăng ký"}
-                </button>
-              </div>
-              
-              <div className="text-center mt-4">
-                <p className="text-gray-600">
-                  Đã có tài khoản?{" "}
-                  <Link to="/login" className="text-blue-600 hover:underline">
-                    Đăng nhập
-                  </Link>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+                  Đăng ký
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <div style={{ textAlign: 'center', marginTop: 24 }}>
+              <Space>
+                <Text type="secondary">Bạn đã có tài khoản?</Text>
+                <Link to="/login">
+                  <Text strong style={{ color: '#1890ff' }}>Đăng nhập ngay</Text>
+                </Link>
+              </Space>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

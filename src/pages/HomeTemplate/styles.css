@@ -1,0 +1,100 @@
+/* HomeTemplate Styles */
+
+/* Layout */
+.home-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-content {
+  flex: 1;
+  padding-top: 20px;
+  padding-bottom: 40px;
+  background-color: #f5f5f5;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Custom styles for active links in header */
+.my-active {
+  color: #1890ff !important;
+  font-weight: bold;
+  border-bottom: 2px solid #1890ff;
+  padding: 8px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .menu-desktop {
+    display: none !important;
+  }
+  
+  .auth-buttons button span {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .menu-mobile {
+    display: none !important;
+  }
+}
+
+/* Banner styles */
+.banner-section {
+  margin-bottom: 40px;
+}
+
+.ant-carousel .slick-slide {
+  text-align: center;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.ant-carousel .slick-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Movie card styles */
+.movie-card {
+  transition: all 0.3s;
+  overflow: hidden;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.movie-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.movie-card .ant-card-cover img {
+  height: 350px;
+  object-fit: cover;
+}
+
+/* Cinema section styles */
+.cinema-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Custom styles for tabs */
+.movie-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #032055;
+  font-weight: bold;
+}
+
+.movie-tabs .ant-tabs-ink-bar {
+  background-color: #032055;
+}

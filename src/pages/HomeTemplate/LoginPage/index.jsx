@@ -1,107 +1,145 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { Form, Input, Button, Alert } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import { Form, Input, Button, Card, Typography, message, Space, Divider, Row, Col } from "antd";
+import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from "@ant-design/icons";
 import api from "../../../services/api";
+
+const { Title, Text } = Typography;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      setError(null);
       
       const result = await api.post("QuanLyNguoiDung/DangNhap", values);
       
-      // Save user info and token to localStorage
-      localStorage.setItem("userInfo", JSON.stringify(result.data.content));
-      localStorage.setItem("accessToken", result.data.content.accessToken);
+      // Lưu thông tin người dùng và token vào localStorage
+      localStorage.setItem("USER_LOGIN", JSON.stringify(result.data.content));
+      localStorage.setItem("USER_LOGIN_TOKEN", result.data.content.accessToken);
       
-      // Redirect to home page
-      navigate("/", { replace: true });
+      message.success("Đăng nhập thành công!");
+      
+      // Kiểm tra nếu là admin thì chuyển đến trang admin, còn không thì về trang chủ
+      if (result.data.content.maLoaiNguoiDung === "QuanTri") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
-      setError(err.response?.data?.content || "Đã xảy ra lỗi khi đăng nhập");
+      message.error(err.response?.data?.content || "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto py-12">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-md">
-        <div className="md:flex">
-          <div className="w-full p-6">
-            <div className="flex justify-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">Đăng nhập</h1>
+    <div style={{ padding: '40px 20px', maxWidth: 1200, margin: '0 auto' }}>
+      <Row justify="center" align="middle">
+        <Col xs={24} sm={18} md={14} lg={10} xl={8}>
+          <Card 
+            bordered={false} 
+            style={{ 
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+              borderRadius: 8
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <Title level={2}>Đăng nhập</Title>
+              <Text type="secondary">
+                Chào mừng bạn quay trở lại với Movie Booking
+              </Text>
             </div>
-            
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-                {error}
-              </div>
-            )}
-            
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              onFinish({
-                taiKhoan: e.target.taiKhoan.value,
-                matKhau: e.target.matKhau.value
-              });
-            }}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="taiKhoan">
-                  Tài khoản
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="taiKhoan"
-                  type="text"
-                  name="taiKhoan"
-                  placeholder="Nhập tài khoản"
-                  required
-                />
-              </div>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="matKhau">
-                  Mật khẩu
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="matKhau"
-                  type="password"
-                  name="matKhau"
-                  placeholder="Nhập mật khẩu"
-                  required
+            <Form
+              form={form}
+              name="login"
+              layout="vertical"
+              onFinish={onFinish}
+              initialValues={{ remember: true }}
+            >
+              <Form.Item
+                name="taiKhoan"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập tài khoản!' },
+                ]}
+              >
+                <Input 
+                  size="large"
+                  prefix={<UserOutlined />} 
+                  placeholder="Tài khoản" 
                 />
-              </div>
+              </Form.Item>
 
-              <div className="flex items-center justify-between">
-                <button
-                  className={`w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  type="submit"
-                  disabled={loading}
+              <Form.Item
+                name="matKhau"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                ]}
+              >
+                <Input.Password 
+                  size="large"
+                  prefix={<LockOutlined />} 
+                  placeholder="Mật khẩu" 
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  size="large"
+                  loading={loading}
+                  style={{ width: '100%' }}
                 >
-                  {loading ? "Đang xử lý..." : "Đăng nhập"}
-                </button>
-              </div>
-              
-              <div className="text-center mt-4">
-                <p className="text-gray-600">
-                  Bạn chưa có tài khoản?{" "}
-                  <Link to="/register" className="text-blue-600 hover:underline">
-                    Đăng ký ngay
-                  </Link>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+                  Đăng nhập
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <div style={{ textAlign: 'center' }}>
+              <Link to="/forgot-password">
+                <Text type="secondary" style={{ cursor: 'pointer' }}>
+                  Quên mật khẩu?
+                </Text>
+              </Link>
+            </div>
+
+            <Divider>
+              <Text type="secondary">Hoặc đăng nhập với</Text>
+            </Divider>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+              <Button 
+                size="large" 
+                icon={<GoogleOutlined />}
+                onClick={() => message.info("Tính năng đang phát triển")}
+              >
+                Google
+              </Button>
+              <Button 
+                size="large" 
+                icon={<FacebookOutlined />}
+                onClick={() => message.info("Tính năng đang phát triển")}
+              >
+                Facebook
+              </Button>
+            </div>
+
+            <div style={{ marginTop: 24, textAlign: 'center' }}>
+              <Space>
+                <Text type="secondary">Bạn chưa có tài khoản?</Text>
+                <Link to="/register">
+                  <Text strong style={{ color: '#1890ff' }}>Đăng ký ngay</Text>
+                </Link>
+              </Space>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

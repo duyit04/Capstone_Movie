@@ -1,179 +1,244 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from "../../../services/api";
-import { Tabs } from "antd";
+import { Row, Col, Typography, Tag, Rate, Button, Tabs, Collapse, Spin, Image, Space, Card, Divider, message } from 'antd';
+import { CalendarOutlined, ClockCircleOutlined, PlayCircleOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import 'moment/locale/vi';
+
+const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
+const { Panel } = Collapse;
 
 export default function MovieDetail() {
   const { id } = useParams();
-  const [state, setState] = useState({
-    loading: false,
-    data: null,
-    error: null,
-  });
+  const navigate = useNavigate();
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showtimes, setShowtimes] = useState(null);
+  const [activeSystem, setActiveSystem] = useState('');
 
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
-        setState({
-          loading: true,
-          data: null,
-          error: null,
-        });
-        
+        setLoading(true);
         const result = await api.get(`QuanLyPhim/LayThongTinPhim?MaPhim=${id}`);
-        
-        // Get movie showtimes
+        setMovie(result.data.content);
+
         const showtimes = await api.get(`QuanLyRap/LayThongTinLichChieuPhim?MaPhim=${id}`);
-        
-        setState({
-          loading: false,
-          data: {
-            ...result.data.content,
-            heThongRapChieu: showtimes.data.content.heThongRapChieu || [],
-          },
-          error: null,
-        });
-      } catch (err) {
-        setState({
-          loading: false,
-          data: null,
-          error: err,
-        });
+        setShowtimes(showtimes.data.content);
+
+        // Set default active system if available
+        if (showtimes.data.content.heThongRapChieu.length > 0) {
+          setActiveSystem(showtimes.data.content.heThongRapChieu[0].maHeThongRap);
+        }
+
+      } catch (error) {
+        console.error("Lỗi khi tải thông tin phim:", error);
+        message.error("Không thể tải thông tin phim. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
       }
     };
-    
+
     fetchMovieDetail();
+    window.scrollTo(0, 0);
   }, [id]);
 
-  const { data, loading, error } = state;
+  const handleBookTicket = (maLichChieu) => {
+    navigate(`/dat-ve/${maLichChieu}`);
+  };
 
-  if (loading) return <div className="container mx-auto py-10">Loading...</div>;
-  if (error) return <div className="container mx-auto py-10">Error: {error.message}</div>;
-  if (!data) return <div className="container mx-auto py-10">No data found</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Title level={3}>Phim không tồn tại hoặc đã bị xóa!</Title>
+        <Button type="primary" onClick={() => navigate('/')}>Quay lại trang chủ</Button>
+      </div>
+    );
+  }
+
+  const renderCinemaSystem = () => {
+    if (!showtimes || !showtimes.heThongRapChieu || showtimes.heThongRapChieu.length === 0) {
+      return (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <Text>Phim chưa có lịch chiếu.</Text>
+        </div>
+      );
+    }
+
+    return (
+      <Tabs 
+        tabPosition="left"
+        activeKey={activeSystem}
+        onChange={(key) => setActiveSystem(key)}
+        style={{ minHeight: 500 }}
+      >
+        {showtimes.heThongRapChieu.map((system) => (
+          <TabPane
+            key={system.maHeThongRap}
+            tab={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <img src={system.logo} alt={system.tenHeThongRap} width={40} style={{ marginRight: 10 }} />
+                <span>{system.tenHeThongRap}</span>
+              </div>
+            }
+          >
+            <Collapse accordion defaultActiveKey={system.cumRapChieu[0]?.maCumRap}>
+              {system.cumRapChieu.map((cinema) => (
+                <Panel
+                  key={cinema.maCumRap}
+                  header={
+                    <div>
+                      <Text strong>{cinema.tenCumRap}</Text>
+                      <br />
+                      <Text type="secondary">{cinema.diaChi}</Text>
+                    </div>
+                  }
+                >
+                  <Row gutter={[16, 16]}>
+                    {cinema.lichChieuPhim
+                      .sort((a, b) => moment(a.ngayChieuGioChieu) - moment(b.ngayChieuGioChieu))
+                      .map((showtime) => (
+                        <Col key={showtime.maLichChieu} xs={24} sm={12} md={8} lg={8} xl={6}>
+                          <Card size="small" hoverable style={{ textAlign: 'center' }}>
+                            <Space direction="vertical">
+                              <Text>
+                                <CalendarOutlined /> {moment(showtime.ngayChieuGioChieu).format('DD/MM/YYYY')}
+                              </Text>
+                              <Button 
+                                type="primary" 
+                                onClick={() => handleBookTicket(showtime.maLichChieu)}
+                                style={{ width: '100%' }}
+                              >
+                                {moment(showtime.ngayChieuGioChieu).format('HH:mm')}
+                              </Button>
+                            </Space>
+                          </Card>
+                        </Col>
+                      ))}
+                  </Row>
+                </Panel>
+              ))}
+            </Collapse>
+          </TabPane>
+        ))}
+      </Tabs>
+    );
+  };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="grid grid-cols-12 gap-8">
-        {/* Movie Image and Info */}
-        <div className="col-span-4">
-          <img 
-            src={data.hinhAnh} 
-            alt={data.tenPhim} 
-            className="w-full h-auto rounded-lg shadow-lg"
-          />
-        </div>
-        
-        <div className="col-span-8">
-          <h1 className="text-3xl font-bold mb-4">{data.tenPhim}</h1>
-          
-          <div className="mb-4">
-            <div className="flex items-center mb-2">
-              <span className="font-bold mr-2">Rating:</span>
-              <div className="flex">
-                {[...Array(Math.floor(data.danhGia / 2))].map((_, i) => (
-                  <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-                <span className="ml-2">({data.danhGia}/10)</span>
+    <div style={{ padding: '20px' }}>
+      {/* Movie Detail */}
+      <div 
+        className="movie-backdrop" 
+        style={{ 
+          backgroundImage: `url(${movie.hinhAnh})`,
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          position: 'relative',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          marginBottom: '30px'
+        }}
+      >
+        <div style={{ 
+          background: 'rgba(0,0,0,0.75)', 
+          padding: '40px 20px',
+        }}>
+          <Row gutter={[24, 24]} align="middle">
+            <Col xs={24} sm={24} md={8} lg={6}>
+              <div style={{ textAlign: 'center' }}>
+                <Image
+                  src={movie.hinhAnh}
+                  alt={movie.tenPhim}
+                  style={{ 
+                    width: '100%', 
+                    maxWidth: '300px', 
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
+                    borderRadius: '8px' 
+                  }}
+                  fallback="https://placehold.co/300x450?text=No+Image"
+                  preview={false}
+                />
               </div>
-            </div>
-            
-            <p className="mb-2"><span className="font-bold">Ngày khởi chiếu:</span> {new Date(data.ngayKhoiChieu).toLocaleDateString('vi-VN')}</p>
-            
-            <div className="mb-4">
-              {data.hot && (
-                <span className="inline-block bg-red-500 text-white px-2 py-1 rounded mr-2 text-sm">
-                  HOT
-                </span>
-              )}
-              {data.dangChieu && (
-                <span className="inline-block bg-green-500 text-white px-2 py-1 rounded mr-2 text-sm">
-                  ĐANG CHIẾU
-                </span>
-              )}
-              {data.sapChieu && (
-                <span className="inline-block bg-blue-500 text-white px-2 py-1 rounded text-sm">
-                  SẮP CHIẾU
-                </span>
-              )}
-            </div>
-          </div>
-          
-          <div className="mb-6">
-            <h2 className="text-xl font-bold mb-2">Mô tả</h2>
-            <p className="text-gray-700">{data.moTa}</p>
-          </div>
-          
-          {data.trailer && (
-            <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2">Trailer</h2>
-              <button 
-                className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
-                onClick={() => window.open(data.trailer, '_blank')}
-              >
-                Xem Trailer
-              </button>
-            </div>
-          )}
+            </Col>
+            <Col xs={24} sm={24} md={16} lg={18}>
+              <Title style={{ color: 'white', marginBottom: '16px' }}>{movie.tenPhim}</Title>
+              
+              <Space direction="vertical" size="large" style={{ width: '100%', color: 'white' }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={24}>
+                    <Tag color="red">{movie.hot ? 'HOT' : 'NEW'}</Tag>
+                    {movie.dangChieu && <Tag color="green">Đang chiếu</Tag>}
+                    {movie.sapChieu && <Tag color="blue">Sắp chiếu</Tag>}
+                  </Col>
+                  
+                  <Col span={24}>
+                    <Space size="large">
+                      <div>
+                        <Text style={{ color: 'white' }}><CalendarOutlined /> Ngày khởi chiếu: </Text>
+                        <Text strong style={{ color: 'white' }}>
+                          {moment(movie.ngayKhoiChieu).format('DD/MM/YYYY')}
+                        </Text>
+                      </div>
+                      
+                      <div>
+                        <Text style={{ color: 'white' }}><ClockCircleOutlined /> Thời lượng: </Text>
+                        <Text strong style={{ color: 'white' }}>120 phút</Text>
+                      </div>
+                    </Space>
+                  </Col>
+
+                  <Col span={24}>
+                    <div>
+                      <Text style={{ color: 'white' }}>Đánh giá: </Text>
+                      <Rate allowHalf disabled value={movie.danhGia / 2} style={{ fontSize: 16, marginLeft: 8 }} />
+                      <Text strong style={{ marginLeft: 8, color: 'white' }}>{movie.danhGia}/10</Text>
+                    </div>
+                  </Col>
+                </Row>
+
+                <Paragraph style={{ color: '#ddd', fontSize: '16px' }}>
+                  {movie.moTa || 'Chưa có mô tả cho phim này.'}
+                </Paragraph>
+
+                <Space>
+                  <Button 
+                    type="primary" 
+                    size="large"
+                    icon={<PlayCircleOutlined />} 
+                    onClick={() => {
+                      if (movie.trailer) {
+                        window.open(movie.trailer, '_blank');
+                      } else {
+                        message.info('Chức năng trailer đang được phát triển');
+                      }
+                    }}
+                  >
+                    Xem Trailer
+                  </Button>
+                </Space>
+              </Space>
+            </Col>
+          </Row>
         </div>
       </div>
-      
-      {/* Showtimes Section */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-6">Lịch chiếu</h2>
-        
-        {data.heThongRapChieu && data.heThongRapChieu.length > 0 ? (
-          <Tabs
-            tabPosition="left"
-            items={data.heThongRapChieu.map((heThongRap) => ({
-              label: (
-                <div className="flex items-center">
-                  <img 
-                    src={heThongRap.logo} 
-                    alt={heThongRap.tenHeThongRap} 
-                    className="w-10 h-10 mr-2"
-                  />
-                  <span>{heThongRap.tenHeThongRap}</span>
-                </div>
-              ),
-              key: heThongRap.maHeThongRap,
-              children: (
-                <Tabs
-                  tabPosition="left"
-                  items={heThongRap.cumRapChieu.map((cumRap) => ({
-                    label: (
-                      <div className="text-left">
-                        <h3 className="font-bold">{cumRap.tenCumRap}</h3>
-                        <p className="text-xs">{cumRap.diaChi}</p>
-                      </div>
-                    ),
-                    key: cumRap.maCumRap,
-                    children: (
-                      <div className="grid grid-cols-4 gap-4">
-                        {cumRap.lichChieuPhim.map((lichChieu) => (
-                          <button 
-                            key={lichChieu.maLichChieu}
-                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded"
-                            onClick={() => window.location.href = `/dat-ve/${lichChieu.maLichChieu}`}
-                          >
-                            {new Date(lichChieu.ngayChieuGioChieu).toLocaleTimeString('vi-VN')}
-                            <br />
-                            <span className="text-xs">
-                              {new Date(lichChieu.ngayChieuGioChieu).toLocaleDateString('vi-VN')}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    ),
-                  }))}
-                />
-              ),
-            }))}
-          />
-        ) : (
-          <p>Không có lịch chiếu</p>
-        )}
+
+      {/* Showtimes */}
+      <div>
+        <Divider orientation="left">
+          <Title level={3}>Lịch chiếu</Title>
+        </Divider>
+        {renderCinemaSystem()}
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export const bookTickets = createAsyncThunk(
   async (bookingData, { rejectWithValue, getState }) => {
     try {
       // Lấy accessToken từ localStorage
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("USER_LOGIN_TOKEN");
       
       if (!token) {
         return rejectWithValue("User not logged in");
