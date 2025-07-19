@@ -67,6 +67,10 @@ const routes = [
     element: AdminTemplate,
     nested: [
       {
+        path: "",
+        element: Dashboard,
+      },
+      {
         path: "dashboard",
         element: Dashboard,
       },
@@ -88,6 +92,10 @@ const routes = [
       },
       {
         path: "films/showtime/:id",
+        element: Showtime,
+      },
+      {
+        path: "showtimes",
         element: Showtime,
       },
     ],

@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
-import { Layout, BackTop } from "antd";
+import { Layout, FloatButton } from "antd";
 import Header from "./_components/Header";
 import Footer from "./_components/Footer";
 import "./styles.css";
@@ -22,7 +22,7 @@ export default function HomeTemplate() {
         </div>
       </Content>
       <Footer />
-      <BackTop />
+      <FloatButton.BackTop />
     </Layout>
   );
 }

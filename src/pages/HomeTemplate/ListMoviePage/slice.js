@@ -11,9 +11,10 @@ const initialState = {
 export const fetchListMovie = createAsyncThunk("ListMovie/fetchData",async (__dirname,{rejectWithValue}) => {
     try {
         const result = await api.get("QuanLyPhim/LayDanhSachPhim?maNhom=GP01");
-        return result.data.content;
-        
+        const movies = result.data.content;
+        return movies;
     } catch (error) {
+        console.error("Error fetching movies:", error);
         return rejectWithValue(error);
     }
 })

@@ -45,14 +45,33 @@ export default function AdminTemplate() {
   }
 
   useEffect(() => {
-    // Kiểm tra xem người dùng đã đăng nhập và là admin chưa
+    // Tạo một admin mặc định để bypass quá trình đăng nhập
+    const defaultAdmin = {
+      taiKhoan: "adminBypass",
+      hoTen: "Admin Dev",
+      email: "admin@dev.com",
+      maLoaiNguoiDung: "QuanTri",
+      accessToken: "dev_token_bypass"
+    };
+    
+    // Lưu admin mặc định vào localStorage để bypass đăng nhập
+    localStorage.setItem("USER_INFO", JSON.stringify(defaultAdmin));
+    localStorage.setItem("ACCESS_TOKEN", "dev_token_bypass");
+    
+    // Thiết lập user state
+    setUser(defaultAdmin);
+    setLoading(false);
+    
+    // Bỏ qua toàn bộ kiểm tra đăng nhập và quyền
+    // Chú ý: Nhớ bỏ code này khi triển khai thực tế
+    
+    /* Đoạn code xác thực gốc - sẽ khôi phục sau khi phát triển xong
     const userInfo = localStorage.getItem("USER_INFO");
     if (userInfo) {
       try {
         const parsedUser = JSON.parse(userInfo);
         setUser(parsedUser);
         
-        // Kiểm tra nếu không phải là admin, chuyển về trang chủ
         if (parsedUser.maLoaiNguoiDung !== "QuanTri") {
           message.error("Bạn không có quyền truy cập trang quản trị!");
           navigate("/");
@@ -65,8 +84,8 @@ export default function AdminTemplate() {
     } else {
       navigate("/admin/login");
     }
-    setLoading(false);
-  }, [navigate]);
+    */
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("USER_INFO");

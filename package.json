@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5174 --host",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --port 5174 --host"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
@@ -21,6 +21,8 @@
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {

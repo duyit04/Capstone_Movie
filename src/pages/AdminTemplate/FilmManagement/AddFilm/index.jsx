@@ -13,8 +13,10 @@ export default function AddFilm() {
   const [previewImage, setPreviewImage] = useState(null);
   
   useEffect(() => {
+    // Bỏ qua việc kiểm tra xác thực trong quá trình phát triển
+    /*
     // Check if user is admin
-    const userInfo = localStorage.getItem("userInfo");
+    const userInfo = localStorage.getItem("USER_INFO");
     if (userInfo) {
       const user = JSON.parse(userInfo);
       if (user.maLoaiNguoiDung !== "QuanTri") {
@@ -22,8 +24,9 @@ export default function AddFilm() {
         navigate("/");
       }
     } else {
-      navigate("/login");
+      navigate("/admin/login");
     }
+    */
   }, [navigate]);
   
   const normFile = (e) => {

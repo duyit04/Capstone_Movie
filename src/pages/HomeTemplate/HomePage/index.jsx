@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Carousel, Tabs } from "antd";
 import { Link } from "react-router-dom";
 import { fetchBanners, fetchMovies, fetchCinemas, fetchCinemaSchedules } from "./slice";
+import "./styles.css";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -34,24 +35,39 @@ export default function HomePage() {
   return (
     <div className="container mx-auto pb-10">
       {/* Banner Carousel */}
-      <div className="mb-10">
+      <div className="mb-6">
         {bannersLoading ? (
-          <div className="animate-pulse bg-gray-300 h-96 rounded-lg"></div>
+          <div className="animate-pulse bg-gray-300 h-[350px] md:h-[450px] rounded-lg"></div>
         ) : banners ? (
-          <Carousel autoplay>
-            {banners.map((banner) => (
-              <div key={banner.maBanner} className="h-96">
-                <img 
-                  src={banner.hinhAnh} 
-                  alt={`Banner ${banner.maBanner}`}
-                  className="w-full h-full object-cover rounded-lg"
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/1920x1080?text=Banner+Image";
-                  }}
-                />
-              </div>
-            ))}
-          </Carousel>
+          <div className="banner-container">
+            <Carousel 
+              autoplay 
+              dots={true}
+              dotPosition="bottom"
+              effect="fade"
+              autoplaySpeed={4000}
+              className="banner-carousel"
+            >
+              {banners.map((banner) => (
+                <div key={banner.maBanner} className="h-[350px] md:h-[450px] relative">
+                  <img 
+                    src={banner.hinhAnh} 
+                    alt={`Banner ${banner.maBanner}`}
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/1920x1080?text=Banner+Image";
+                    }}
+                  />
+                  <div className="banner-content">
+                    <h3 className="movie-title">{banner.maPhim ? `${banner.tenPhim || 'Phim Đặc Sắc'}` : 'Suất Chiếu Đặc Biệt'}</h3>
+                    <p className="movie-info">
+                      {banner.maPhim ? 'Đang chiếu tại rạp' : 'Khởi chiếu ngày 25.07'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </Carousel>
+          </div>
         ) : (
           <div className="bg-gray-200 h-96 rounded-lg flex items-center justify-center">
             <p className="text-gray-500">Không có dữ liệu banner</p>
@@ -60,8 +76,8 @@ export default function HomePage() {
       </div>
       
       {/* Movies Section */}
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold mb-6 text-center">Phim chiếu rạp</h2>
+      <div className="mt-8 mb-10">
+        <h2 className="text-3xl font-bold mb-3 text-center">Phim chiếu rạp</h2>
         
         {/* Movie Tabs */}
         <div className="flex justify-center mb-8">

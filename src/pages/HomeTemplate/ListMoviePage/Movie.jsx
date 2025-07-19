@@ -6,7 +6,7 @@ export default function Movie({ movieData }) {
     
     return (
         <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
-            <Link to={`/movie/${movieData.maPhim}`}>
+            <Link to={`/movie/${movieData.maPhim}`} className="relative block">
                 <img 
                     className="rounded-t-lg w-full h-64 object-cover" 
                     src={movieData?.hinhAnh || "https://via.placeholder.com/300x450?text=No+Image"} 
@@ -15,6 +15,16 @@ export default function Movie({ movieData }) {
                         e.target.src = "https://via.placeholder.com/300x450?text=Error+Loading+Image";
                     }}
                 />
+                {movieData.dangChieu && (
+                    <span className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+                        Đang chiếu
+                    </span>
+                )}
+                {movieData.sapChieu && (
+                    <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                        Sắp chiếu
+                    </span>
+                )}
             </Link>
             <div className="p-5">
                 <Link to={`/movie/${movieData.maPhim}`}>

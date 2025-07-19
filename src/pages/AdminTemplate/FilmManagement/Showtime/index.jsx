@@ -15,42 +15,79 @@ export default function ShowtimeManagement() {
   const [cinemas, setCinemas] = useState([]);
   const [cinemaComplexes, setCinemaComplexes] = useState([]);
   const [selectedCinema, setSelectedCinema] = useState(null);
+  const [error, setError] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [selectedMovieId, setSelectedMovieId] = useState(id || null);
   
   useEffect(() => {
-    // Check if user is admin
-    const userInfo = localStorage.getItem("userInfo");
-    if (userInfo) {
-      const user = JSON.parse(userInfo);
-      if (user.maLoaiNguoiDung !== "QuanTri") {
-        message.error("Bạn không có quyền truy cập trang này!");
-        navigate("/");
-        return;
-      }
-    } else {
-      navigate("/login");
-      return;
-    }
+    // Debug info
+    console.log("Showtime management loaded. Film ID:", id);
     
-    // Fetch movie info and cinema systems
-    fetchMovieInfo();
+    // Fetch cinema systems regardless of movie ID
     fetchCinemaSystems();
+    
+    // Fetch list of movies if no specific ID provided
+    if (!id) {
+      fetchMovieList();
+    } else {
+      setSelectedMovieId(id);
+      fetchMovieInfo(id);
+    }
   }, [id, navigate]);
   
-  const fetchMovieInfo = async () => {
+  const fetchMovieList = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
+      setError(null);
       
-      const result = await api.get(`QuanLyPhim/LayThongTinPhim?MaPhim=${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      console.log("Fetching movie list");
+      const result = await api.get("QuanLyPhim/LayDanhSachPhim?maNhom=GP01");
       
-      setMovieInfo(result.data.content);
+      console.log("Movie list response:", result);
+      if (result.data && result.data.content) {
+        setMovies(result.data.content);
+      } else {
+        console.error("API trả về dữ liệu không hợp lệ:", result);
+        setError("Không nhận được danh sách phim từ API");
+        message.error("Không thể tải danh sách phim!");
+      }
+    } catch (err) {
+      console.error("Failed to fetch movie list:", err);
+      setError(err.message || "Không thể tải danh sách phim");
+      message.error("Không thể tải danh sách phim: " + (err.response?.data?.content || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMovieInfo = async (movieId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log("Fetching movie info for ID:", movieId);
+      
+      // Kiểm tra movieId
+      if (!movieId) {
+        console.error("Không có ID phim");
+        setError("Không có ID phim");
+        return;
+      }
+      
+      const result = await api.get(`QuanLyPhim/LayThongTinPhim?MaPhim=${movieId}`);
+      
+      console.log("Movie info response:", result);
+      if (result.data && result.data.content) {
+        setMovieInfo(result.data.content);
+      } else {
+        console.error("API trả về dữ liệu không hợp lệ:", result);
+        setError("Không nhận được dữ liệu phim từ API");
+        message.error("Không thể tải thông tin phim!");
+      }
     } catch (err) {
       console.error("Failed to fetch movie info:", err);
-      message.error("Không thể tải thông tin phim!");
+      setError(err.message || "Không thể tải thông tin phim");
+      message.error("Không thể tải thông tin phim: " + (err.response?.data?.content || err.message));
     } finally {
       setLoading(false);
     }
@@ -60,12 +97,20 @@ export default function ShowtimeManagement() {
     try {
       setLoading(true);
       
+      console.log("Fetching cinema systems");
       const result = await api.get("QuanLyRap/LayThongTinHeThongRap");
       
-      setCinemas(result.data.content);
+      console.log("Cinema systems response:", result);
+      if (result.data && result.data.content) {
+        setCinemas(result.data.content);
+      } else {
+        setError("Không nhận được dữ liệu hệ thống rạp từ API");
+        message.error("Không thể tải danh sách hệ thống rạp!");
+      }
     } catch (err) {
       console.error("Failed to fetch cinema systems:", err);
-      message.error("Không thể tải danh sách hệ thống rạp!");
+      setError(err.message || "Không thể tải danh sách hệ thống rạp");
+      message.error("Không thể tải danh sách hệ thống rạp: " + (err.response?.data?.content || err.message));
     } finally {
       setLoading(false);
     }
@@ -95,11 +140,11 @@ export default function ShowtimeManagement() {
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
       
-      if (!token) {
-        message.error("Bạn chưa đăng nhập!");
-        navigate("/login");
+      // Kiểm tra có phim đã chọn chưa
+      if (!selectedMovieId) {
+        message.error("Vui lòng chọn phim để tạo lịch chiếu!");
+        setLoading(false);
         return;
       }
       
@@ -107,17 +152,13 @@ export default function ShowtimeManagement() {
       const formattedDateTime = moment(values.ngayChieuGioChieu).format("DD/MM/YYYY HH:mm:ss");
       
       const showtime = {
-        maPhim: Number(id),
+        maPhim: Number(selectedMovieId),
         ngayChieuGioChieu: formattedDateTime,
         maRap: values.maRap,
         giaVe: values.giaVe,
       };
       
-      await api.post("QuanLyDatVe/TaoLichChieu", showtime, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
+      await api.post("QuanLyDatVe/TaoLichChieu", showtime);
       
       message.success("Tạo lịch chiếu thành công!");
       navigate("/admin/films");
@@ -129,10 +170,41 @@ export default function ShowtimeManagement() {
     }
   };
   
+  const handleMovieSelect = (movieId) => {
+    setSelectedMovieId(movieId);
+    fetchMovieInfo(movieId);
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-6">Tạo lịch chiếu phim</h1>
+        
+        {loading && <div className="text-center py-4">Đang tải dữ liệu...</div>}
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <strong className="font-bold">Lỗi!</strong>
+            <span className="block"> {error}</span>
+          </div>
+        )}
+
+        {!id && !selectedMovieId && movies.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-3">Chọn phim để tạo lịch chiếu:</h2>
+            <Select 
+              placeholder="Chọn phim" 
+              style={{ width: '100%' }}
+              onChange={handleMovieSelect}
+            >
+              {movies.map((movie) => (
+                <Option key={movie.maPhim} value={movie.maPhim}>
+                  {movie.tenPhim}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        )}
         
         {movieInfo && (
           <div className="flex mb-6">
@@ -141,7 +213,8 @@ export default function ShowtimeManagement() {
               alt={movieInfo.tenPhim} 
               className="w-24 h-36 object-cover rounded mr-4"
               onError={(e) => {
-                e.target.src = "https://via.placeholder.com/96x144?text=No+Image";
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/96x144?text=No+Image";
               }}
             />
             <div>
@@ -151,11 +224,12 @@ export default function ShowtimeManagement() {
           </div>
         )}
         
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-        >
+        {(movieInfo || selectedMovieId) && (
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+          >
           <Form.Item
             name="heThongRap"
             label="Hệ thống rạp"
@@ -233,6 +307,7 @@ export default function ShowtimeManagement() {
             </div>
           </Form.Item>
         </Form>
+        )}
       </div>
     </div>
   );

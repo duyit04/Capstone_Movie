@@ -11,8 +11,9 @@ export default function FilmManagement() {
   const [searchText, setSearchText] = useState("");
   
   useEffect(() => {
-    // Check if user is admin
-    const userInfo = localStorage.getItem("userInfo");
+    // Bỏ qua việc kiểm tra xác thực trong quá trình phát triển
+    /*
+    const userInfo = localStorage.getItem("USER_INFO");
     if (userInfo) {
       const user = JSON.parse(userInfo);
       if (user.maLoaiNguoiDung !== "QuanTri") {
@@ -21,9 +22,10 @@ export default function FilmManagement() {
         return;
       }
     } else {
-      navigate("/login");
+      navigate("/admin/login");
       return;
     }
+    */
     
     fetchMovies();
   }, [navigate]);

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Row, Col, Card, Statistic, Table, Tag, Typography, Spin } from "antd";
+import { Row, Col, Card, Statistic, Table, Tag, Typography, Spin, message } from "antd";
 import { 
   FileOutlined, 
   UserOutlined, 
   TeamOutlined, 
-  CalendarOutlined 
+  CalendarOutlined,
+  VideoCameraOutlined
 } from "@ant-design/icons";
 import api from "../../../services/api";
 
@@ -130,7 +131,7 @@ export default function Dashboard() {
             <Statistic
               title="Tổng số phim"
               value={movieStats.total}
-              prefix={<FilmOutlined />}
+              prefix={<VideoCameraOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
           </Card>
@@ -150,7 +151,7 @@ export default function Dashboard() {
             <Statistic
               title="Phim sắp chiếu"
               value={movieStats.comingSoon}
-              prefix={<FilmOutlined />}
+              prefix={<FileOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
           </Card>
