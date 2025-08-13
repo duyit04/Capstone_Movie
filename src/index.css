@@ -7,3 +7,84 @@
   color: white !important;
   background-color: red !important;
 }
+
+/* Ant Design Message Styling */
+.ant-message {
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.ant-message-notice {
+  margin-bottom: 8px;
+}
+
+.ant-message-notice-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px 16px;
+  font-weight: 500;
+  min-width: 300px;
+  text-align: center;
+}
+
+.ant-message-success .ant-message-notice-content {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+  color: white;
+  border: none;
+}
+
+.ant-message-error .ant-message-notice-content {
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+  color: white;
+  border: none;
+}
+
+.ant-message-warning .ant-message-notice-content {
+  background: linear-gradient(135deg, #faad14, #ffc53d);
+  color: white;
+  border: none;
+}
+
+.ant-message-info .ant-message-notice-content {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  color: white;
+  border: none;
+}
+
+/* Đảm bảo thông báo hiển thị trên cùng */
+.ant-message-notice-wrapper {
+  z-index: 9999 !important;
+  position: relative;
+}
+
+/* Animation cho thông báo */
+.ant-message-notice-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.ant-message-notice-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease-out;
+}
+
+.ant-message-notice-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ant-message-notice-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease-in;
+}
+
+/* Đảm bảo thông báo không bị che bởi các element khác */
+.ant-message-notice-content {
+  position: relative;
+  z-index: 10000 !important;
+}

@@ -18,16 +18,39 @@ export default function Header() {
 
   useEffect(() => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
-    const userInfo = localStorage.getItem("USER_INFO");
-    if (userInfo) {
-      setUser(JSON.parse(userInfo));
-    }
+    const checkUserLogin = () => {
+      const userInfo = localStorage.getItem("USER_INFO");
+      if (userInfo) {
+        setUser(JSON.parse(userInfo));
+      } else {
+        setUser(null);
+      }
+    };
+
+    // Kiểm tra lần đầu
+    checkUserLogin();
+
+    // Lắng nghe event khi có thay đổi đăng nhập
+    const handleUserLoginChange = () => {
+      checkUserLogin();
+    };
+
+    window.addEventListener('userLoginChange', handleUserLoginChange);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('userLoginChange', handleUserLoginChange);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("USER_INFO");
     localStorage.removeItem("ACCESS_TOKEN");
     setUser(null);
+    
+    // Thông báo cho các component khác biết về thay đổi đăng xuất
+    window.dispatchEvent(new Event('userLoginChange'));
+    
     navigate("/login");
   };
 

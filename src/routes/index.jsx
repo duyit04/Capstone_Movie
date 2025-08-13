@@ -17,6 +17,7 @@ import FilmManagement from "../pages/AdminTemplate/FilmManagement";
 import AddFilm from "../pages/AdminTemplate/FilmManagement/AddFilm";
 import EditFilm from "../pages/AdminTemplate/FilmManagement/EditFilm";
 import Showtime from "../pages/AdminTemplate/FilmManagement/Showtime";
+import AdminProfilePage from "../pages/AdminTemplate/ProfilePage";
 import { Route } from "react-router-dom";
 
 const routes = [
@@ -97,6 +98,10 @@ const routes = [
       {
         path: "showtimes",
         element: Showtime,
+      },
+      {
+        path: "profile",
+        element: AdminProfilePage,
       },
     ],
   },

@@ -1,0 +1,465 @@
+/* DashboardKit Theme for Admin Template */
+:root {
+  --dashkit-bg: #eff3f6;
+  --dashkit-sidebar-bg: #3f4d67;
+  --dashkit-sidebar-active: #1dc4e9;
+  --dashkit-sidebar-hover: rgba(29, 196, 233, 0.1);
+  --dashkit-card-bg: #ffffff;
+  --dashkit-card-border: #e2e5e8;
+  --dashkit-card-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  --dashkit-header-bg: #ffffff;
+  --dashkit-header-shadow: 0 2px 10px -5px rgba(0, 0, 0, 0.15);
+  --dashkit-text: #333;
+  --dashkit-text-muted: #6c757d;
+  --dashkit-primary: #1dc4e9;
+  --dashkit-secondary: #04a9f5;
+  --dashkit-success: #2ed8b6;
+  --dashkit-warning: #ffb64d;
+  --dashkit-danger: #ff5370;
+  --dashkit-purple: #7759de;
+  --dashkit-info: #00bcd4;
+  
+  --dashkit-transition: all 0.3s ease;
+  --dashkit-radius: 5px;
+  --dashkit-radius-lg: 8px;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --dashkit-bg: #222;
+  --dashkit-sidebar-bg: #1a232e;
+  --dashkit-card-bg: #2b3844;
+  --dashkit-card-border: #384759;
+  --dashkit-header-bg: #1a232e;
+  --dashkit-header-shadow: 0 2px 10px -5px rgba(0, 0, 0, 0.5);
+  --dashkit-text: #d3d3d3;
+  --dashkit-text-muted: #8a8d91;
+}
+
+/* Layout */
+.dashkit-layout {
+  background-color: var(--dashkit-bg);
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.dashkit-sider {
+  background: var(--dashkit-sidebar-bg);
+  box-shadow: 2px 0 10px 0 rgba(0, 0, 0, 0.2);
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.dashkit-logo {
+  height: 70px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.dashkit-logo-icon {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.dashkit-logo-text {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Menu */
+.dashkit-menu {
+  background: transparent !important;
+  border: none;
+  padding: 10px 0;
+}
+
+.dashkit-menu .ant-menu-item {
+  margin: 5px 10px;
+  border-radius: var(--dashkit-radius);
+  height: 40px;
+  line-height: 40px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.dashkit-menu .ant-menu-item:hover {
+  background: var(--dashkit-sidebar-hover);
+  color: #fff;
+}
+
+.dashkit-menu .ant-menu-item-selected {
+  background: var(--dashkit-sidebar-active) !important;
+  color: #fff !important;
+}
+
+.dashkit-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #fff;
+}
+
+.dashkit-menu .ant-menu-item-icon {
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+/* Header */
+.dashkit-header {
+  background: var(--dashkit-header-bg);
+  padding: 0 20px;
+  box-shadow: var(--dashkit-header-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  height: 70px;
+  line-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashkit-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.dashkit-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--dashkit-text);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dashkit-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dashkit-header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dashkit-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: var(--dashkit-radius);
+}
+
+.dashkit-user-info:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dashkit-avatar {
+  background-color: var(--dashkit-primary);
+}
+
+.dashkit-username {
+  font-weight: 500;
+}
+
+/* Content */
+.dashkit-content {
+  margin-left: 260px;
+  padding: 24px;
+  transition: var(--dashkit-transition);
+  min-height: calc(100vh - 70px);
+}
+
+.ant-layout-sider-collapsed + .ant-layout .dashkit-content {
+  margin-left: 80px;
+}
+
+/* Cards */
+.dashkit-card {
+  background: var(--dashkit-card-bg);
+  border: 1px solid var(--dashkit-card-border);
+  border-radius: var(--dashkit-radius);
+  box-shadow: var(--dashkit-card-shadow);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.dashkit-card-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--dashkit-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashkit-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dashkit-text);
+}
+
+.dashkit-card-body {
+  padding: 20px;
+}
+
+/* Stat Cards */
+.dashkit-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.dashkit-stat-card {
+  background: var(--dashkit-card-bg);
+  border-radius: var(--dashkit-radius);
+  box-shadow: var(--dashkit-card-shadow);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  border-left: 4px solid;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashkit-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashkit-stat-primary {
+  border-left-color: var(--dashkit-primary);
+}
+
+.dashkit-stat-info {
+  border-left-color: var(--dashkit-info);
+}
+
+.dashkit-stat-success {
+  border-left-color: var(--dashkit-success);
+}
+
+.dashkit-stat-warning {
+  border-left-color: var(--dashkit-warning);
+}
+
+.dashkit-stat-danger {
+  border-left-color: var(--dashkit-danger);
+}
+
+.dashkit-stat-purple {
+  border-left-color: var(--dashkit-purple);
+}
+
+.dashkit-stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #f3f3f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.dashkit-stat-primary .dashkit-stat-icon {
+  color: var(--dashkit-primary);
+  background: rgba(29, 196, 233, 0.2);
+}
+
+.dashkit-stat-info .dashkit-stat-icon {
+  color: var(--dashkit-info);
+  background: rgba(0, 188, 212, 0.2);
+}
+
+.dashkit-stat-success .dashkit-stat-icon {
+  color: var(--dashkit-success);
+  background: rgba(46, 216, 182, 0.2);
+}
+
+.dashkit-stat-warning .dashkit-stat-icon {
+  color: var(--dashkit-warning);
+  background: rgba(255, 182, 77, 0.2);
+}
+
+.dashkit-stat-danger .dashkit-stat-icon {
+  color: var(--dashkit-danger);
+  background: rgba(255, 83, 112, 0.2);
+}
+
+.dashkit-stat-purple .dashkit-stat-icon {
+  color: var(--dashkit-purple);
+  background: rgba(119, 89, 222, 0.2);
+}
+
+.dashkit-stat-content {
+  flex: 1;
+}
+
+.dashkit-stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+  color: var(--dashkit-text);
+}
+
+.dashkit-stat-label {
+  font-size: 13px;
+  color: var(--dashkit-text-muted);
+  margin: 0;
+}
+
+/* Tables */
+.dashkit-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dashkit-table th {
+  background: #f8f9fa;
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid var(--dashkit-card-border);
+  color: var(--dashkit-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashkit-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--dashkit-card-border);
+  vertical-align: middle;
+}
+
+.dashkit-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dashkit-table tr:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Enhanced Antd Table */
+.dashkit-table .ant-table-thead > tr > th {
+  background: var(--dashkit-bg);
+  color: var(--dashkit-text-muted);
+  font-weight: 600;
+  padding: 12px 16px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashkit-table .ant-table-tbody > tr > td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+
+.dashkit-table .ant-table-tbody > tr {
+  transition: all 0.2s ease;
+}
+
+.dashkit-table .ant-table-tbody > tr:hover > td {
+  background: rgba(0,0,0,0.03);
+}
+
+.dashkit-table .ant-image {
+  transition: transform 0.2s ease;
+}
+
+.dashkit-table .ant-image-mask:hover {
+  opacity: 1;
+}
+
+.dashkit-table .ant-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  height: 32px;
+  width: 32px;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.dashkit-table .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Badge */
+.dashkit-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dashkit-badge-primary {
+  background: rgba(29, 196, 233, 0.2);
+  color: var(--dashkit-primary);
+}
+
+.dashkit-badge-success {
+  background: rgba(46, 216, 182, 0.2);
+  color: var(--dashkit-success);
+}
+
+.dashkit-badge-warning {
+  background: rgba(255, 182, 77, 0.2);
+  color: var(--dashkit-warning);
+}
+
+.dashkit-badge-danger {
+  background: rgba(255, 83, 112, 0.2);
+  color: var(--dashkit-danger);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .dashkit-sider {
+    transform: translateX(-100%);
+  }
+  
+  .ant-layout-sider-collapsed.dashkit-sider {
+    transform: translateX(0);
+  }
+  
+  .dashkit-content {
+    margin-left: 0;
+  }
+  
+  .ant-layout-sider-collapsed + .ant-layout .dashkit-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashkit-stat-row {
+    grid-template-columns: 1fr;
+  }
+}

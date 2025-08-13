@@ -1,0 +1,291 @@
+/* Admin Template Custom Styles - Notus React Theme */
+
+/* Custom Table Styles */
+.custom-table .ant-table-thead > tr > th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 16px;
+}
+
+.custom-table .ant-table-tbody > tr > td {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-table .ant-table-tbody > tr:hover > td {
+  background-color: #f8fafc;
+}
+
+/* Custom Pagination */
+.custom-pagination .ant-pagination-item {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.custom-pagination .ant-pagination-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.custom-pagination .ant-pagination-item-active a {
+  color: white;
+}
+
+.custom-pagination .ant-pagination-prev,
+.custom-pagination .ant-pagination-next {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Card Hover Effects */
+.ant-card {
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Button Customization */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Input Customization */
+.ant-input,
+.ant-input-affix-wrapper {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Select Customization */
+.ant-select-selector {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Modal Customization */
+.ant-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.ant-modal-title {
+  color: white !important;
+}
+
+.ant-modal-close {
+  color: white;
+}
+
+.ant-modal-close:hover {
+  color: #f0f0f0;
+}
+
+/* Tag Customization */
+.ant-tag {
+  border-radius: 20px;
+  font-weight: 500;
+  border: none;
+}
+
+/* Avatar Customization */
+.ant-avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar Customization */
+.ant-progress-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Loading Spinner */
+.ant-spin-dot-item {
+  background-color: #667eea;
+}
+
+/* Dropdown Menu */
+.ant-dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+}
+
+.ant-dropdown-menu-item {
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.ant-dropdown-menu-item:hover {
+  background-color: #f8fafc;
+}
+
+/* Badge Customization */
+.ant-badge-count {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Tooltip Customization */
+.ant-tooltip-inner {
+  background: #1f2937;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* Form Item Labels */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Table Row Hover */
+.ant-table-tbody > tr:hover > td {
+  background-color: #f8fafc !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ant-card {
+    margin-bottom: 16px;
+  }
+  
+  .ant-table {
+    font-size: 12px;
+  }
+  
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .ant-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .ant-table {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .ant-table-thead > tr > th {
+    background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);
+  }
+  
+  .ant-table-tbody > tr > td {
+    border-bottom-color: #374151;
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background-color: #374151 !important;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Shadow Utilities */
+.shadow-soft {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-large {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}

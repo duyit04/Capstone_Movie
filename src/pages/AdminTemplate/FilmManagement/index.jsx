@@ -10,10 +10,19 @@ export default function FilmManagement() {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   
+  // Kiểm tra token xác thực
+  const checkAuth = () => {
+    const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("accessToken");
+    if (!token) {
+      message.error("Không tìm thấy token xác thực. Vui lòng đăng nhập lại!");
+      return false;
+    }
+    return token;
+  };
+  
   useEffect(() => {
-    // Bỏ qua việc kiểm tra xác thực trong quá trình phát triển
-    /*
-    const userInfo = localStorage.getItem("USER_INFO");
+    // Kiểm tra xác thực thực tế
+    const userInfo = localStorage.getItem("USER_INFO") || localStorage.getItem("USER_LOGIN");
     if (userInfo) {
       const user = JSON.parse(userInfo);
       if (user.maLoaiNguoiDung !== "QuanTri") {
@@ -25,7 +34,6 @@ export default function FilmManagement() {
       navigate("/admin/login");
       return;
     }
-    */
     
     fetchMovies();
   }, [navigate]);
@@ -33,7 +41,8 @@ export default function FilmManagement() {
   const fetchMovies = async (keyword = "") => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
+      const token = checkAuth();
+      if (!token) return;
       
       const url = keyword 
         ? `QuanLyPhim/LayDanhSachPhim?maNhom=GP01&tenPhim=${keyword}`
@@ -48,7 +57,16 @@ export default function FilmManagement() {
       setMovies(result.data.content);
     } catch (err) {
       console.error("Failed to fetch movies:", err);
-      message.error("Không thể tải danh sách phim!");
+      
+      if (err.response?.status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+      } else if (err.response?.status === 403) {
+        message.error("Bạn không có quyền truy cập danh sách phim!");
+      } else {
+        message.error("Không thể tải danh sách phim!");
+      }
+      
+      setMovies([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -61,7 +79,8 @@ export default function FilmManagement() {
   const handleDelete = async (movieId) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
+      const token = checkAuth();
+      if (!token) return;
       
       await api.delete(`QuanLyPhim/XoaPhim?MaPhim=${movieId}`, {
         headers: {
@@ -73,7 +92,16 @@ export default function FilmManagement() {
       fetchMovies(); // Refresh the list
     } catch (err) {
       console.error("Failed to delete movie:", err);
-      message.error("Không thể xóa phim này!");
+      
+      if (err.response?.status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        // Có thể redirect về trang login
+        // navigate("/admin/login");
+      } else if (err.response?.status === 403) {
+        message.error("Bạn không có quyền xóa phim này!");
+      } else {
+        message.error("Không thể xóa phim này!");
+      }
     } finally {
       setLoading(false);
     }

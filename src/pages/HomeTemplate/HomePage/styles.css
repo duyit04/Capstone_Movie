@@ -80,3 +80,114 @@
 .banner-carousel img {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Pagination Styling */
+.custom-pagination {
+  margin-top: 2rem;
+}
+
+.custom-pagination .ant-pagination-item {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.custom-pagination .ant-pagination-item:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.custom-pagination .ant-pagination-item-active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.custom-pagination .ant-pagination-item-active:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.custom-pagination .ant-pagination-prev,
+.custom-pagination .ant-pagination-next {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.custom-pagination .ant-pagination-prev:hover,
+.custom-pagination .ant-pagination-next:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.custom-pagination .ant-pagination-prev:disabled,
+.custom-pagination .ant-pagination-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.custom-pagination .ant-pagination-jump-prev,
+.custom-pagination .ant-pagination-jump-next {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.custom-pagination .ant-pagination-jump-prev:hover,
+.custom-pagination .ant-pagination-jump-next:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.custom-pagination .ant-pagination-total-text {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  .custom-pagination .ant-pagination-item {
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+  }
+  
+  .custom-pagination .ant-pagination-prev,
+  .custom-pagination .ant-pagination-next {
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+  }
+  
+  .custom-pagination .ant-pagination-total-text {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .custom-pagination {
+    margin-top: 1.5rem;
+  }
+  
+  .custom-pagination .ant-pagination-item {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+    font-size: 14px;
+  }
+  
+  .custom-pagination .ant-pagination-prev,
+  .custom-pagination .ant-pagination-next {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+  }
+}

@@ -13,8 +13,6 @@ export default function AddFilm() {
   const [previewImage, setPreviewImage] = useState(null);
   
   useEffect(() => {
-    // Bỏ qua việc kiểm tra xác thực trong quá trình phát triển
-    /*
     // Check if user is admin
     const userInfo = localStorage.getItem("USER_INFO");
     if (userInfo) {
@@ -26,7 +24,6 @@ export default function AddFilm() {
     } else {
       navigate("/admin/login");
     }
-    */
   }, [navigate]);
   
   const normFile = (e) => {
@@ -64,11 +61,11 @@ export default function AddFilm() {
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("ACCESS_TOKEN");
       
       if (!token) {
         message.error("Bạn chưa đăng nhập!");
-        navigate("/login");
+        navigate("/admin/login");
         return;
       }
       
@@ -101,6 +98,14 @@ export default function AddFilm() {
       navigate("/admin/films");
     } catch (err) {
       console.error("Failed to add movie:", err);
+      
+      // Kiểm tra nếu token hết hạn hoặc không hợp lệ
+      if (err.response?.status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+        navigate("/admin/login");
+        return;
+      }
+      
       message.error("Không thể thêm phim: " + (err.response?.data?.content || err.message));
     } finally {
       setLoading(false);

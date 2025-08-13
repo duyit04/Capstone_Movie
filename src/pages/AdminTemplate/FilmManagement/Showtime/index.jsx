@@ -141,9 +141,19 @@ export default function ShowtimeManagement() {
     try {
       setLoading(true);
       
+      console.log("Form values:", values);
+      console.log("Selected movie ID:", selectedMovieId);
+      
       // Kiểm tra có phim đã chọn chưa
       if (!selectedMovieId) {
         message.error("Vui lòng chọn phim để tạo lịch chiếu!");
+        setLoading(false);
+        return;
+      }
+      
+      // Kiểm tra giá vé
+      if (!values.giaVe || values.giaVe < 75000 || values.giaVe > 200000) {
+        message.error("Giá vé phải từ 75,000đ đến 200,000đ!");
         setLoading(false);
         return;
       }
@@ -155,8 +165,10 @@ export default function ShowtimeManagement() {
         maPhim: Number(selectedMovieId),
         ngayChieuGioChieu: formattedDateTime,
         maRap: values.maRap,
-        giaVe: values.giaVe,
+        giaVe: Number(values.giaVe),
       };
+      
+      console.log("Showtime data to send:", showtime);
       
       await api.post("QuanLyDatVe/TaoLichChieu", showtime);
       
@@ -229,6 +241,12 @@ export default function ShowtimeManagement() {
             form={form}
             layout="vertical"
             onFinish={onFinish}
+            initialValues={{
+              giaVe: 75000
+            }}
+            onValuesChange={(changedValues, allValues) => {
+              console.log("Form changed:", changedValues, allValues);
+            }}
           >
           <Form.Item
             name="heThongRap"
@@ -289,10 +307,27 @@ export default function ShowtimeManagement() {
               min={75000}
               max={200000}
               step={1000}
-              defaultValue={75000}
               style={{ width: '100%' }}
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+              formatter={(value) => {
+                if (value) {
+                  return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                return '';
+              }}
+              parser={(value) => {
+                if (typeof value === 'string') {
+                  const parsed = value.replace(/\$\s?|(,*)/g, '');
+                  return parsed ? Number(parsed) : 75000;
+                }
+                return value || 75000;
+              }}
+              placeholder="Nhập giá vé"
+              onBlur={(e) => {
+                const value = e.target.value;
+                if (value && !isNaN(value)) {
+                  form.setFieldsValue({ giaVe: Number(value) });
+                }
+              }}
             />
           </Form.Item>
           

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Carousel, Tabs } from "antd";
+import { Carousel, Tabs, Pagination } from "antd";
 import { Link } from "react-router-dom";
 import { fetchBanners, fetchMovies, fetchCinemas, fetchCinemaSchedules } from "./slice";
 import "./styles.css";
@@ -15,6 +15,8 @@ export default function HomePage() {
   } = useSelector((state) => state.homeSlice);
   
   const [activeTab, setActiveTab] = useState("all"); // "all", "nowShowing", "comingSoon"
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20); // Hiển thị 20 phim mỗi trang
   
   useEffect(() => {
     // Fetch all required data for the homepage
@@ -31,6 +33,25 @@ export default function HomePage() {
     if (activeTab === "comingSoon") return movie.sapChieu;
     return true;
   });
+  
+  // Calculate pagination
+  const totalMovies = filteredMovies?.length || 0;
+  const totalPages = Math.ceil(totalMovies / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentMovies = filteredMovies?.slice(startIndex, endIndex) || [];
+  
+  // Reset to first page when changing tabs
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+  
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   return (
     <div className="container mx-auto pb-10">
@@ -89,7 +110,7 @@ export default function HomePage() {
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               } rounded-l-lg border border-gray-200`}
-              onClick={() => setActiveTab("all")}
+              onClick={() => handleTabChange("all")}
             >
               Tất cả
             </button>
@@ -100,7 +121,7 @@ export default function HomePage() {
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               } border-t border-b border-r border-gray-200`}
-              onClick={() => setActiveTab("nowShowing")}
+              onClick={() => handleTabChange("nowShowing")}
             >
               Đang chiếu
             </button>
@@ -111,7 +132,7 @@ export default function HomePage() {
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               } rounded-r-lg border-t border-b border-r border-gray-200`}
-              onClick={() => setActiveTab("comingSoon")}
+              onClick={() => handleTabChange("comingSoon")}
             >
               Sắp chiếu
             </button>
@@ -125,10 +146,10 @@ export default function HomePage() {
               <div key={i} className="animate-pulse bg-gray-300 h-64 rounded-lg"></div>
             ))}
           </div>
-        ) : filteredMovies && filteredMovies.length > 0 ? (
+        ) : currentMovies && currentMovies.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredMovies.map((movie) => (
-              <div key={movie.maPhim} className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {currentMovies.map((movie) => (
+              <div key={movie.maPhim} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <img
                   src={movie.hinhAnh}
                   alt={movie.tenPhim}
@@ -148,7 +169,7 @@ export default function HomePage() {
                     </div>
                     <Link
                       to={`/movie/${movie.maPhim}`}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors duration-200"
                     >
                       Chi tiết
                     </Link>
@@ -159,6 +180,26 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="text-center text-gray-500">Không có phim để hiển thị</div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex flex-col items-center">
+            <div className="text-sm text-gray-500 mb-4">
+              Trang {currentPage} của {totalPages}
+            </div>
+            <Pagination
+              current={currentPage}
+              total={totalMovies}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+              showQuickJumper={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} phim`}
+              className="custom-pagination"
+              size="default"
+            />
+          </div>
         )}
       </div>
       

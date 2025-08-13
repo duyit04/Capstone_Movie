@@ -1,0 +1,78 @@
+/* HEADER COLOR OVERRIDE - HIGHEST PRIORITY */
+/* This file should be imported last to override all other styles */
+
+/* Force header background color */
+header,
+.header,
+[class*="header"],
+.header-container,
+.header-logo,
+.header-nav,
+.header-search,
+.header-actions {
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  background-image: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+}
+
+/* Specific header element override */
+header.header {
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  background-image: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3) !important;
+}
+
+/* Override scrolled state */
+.header-scrolled,
+.header.header-scrolled {
+  background: rgba(255, 153, 0, 0.95) !important;
+  background-image: none !important;
+}
+
+/* Mobile navigation override */
+.mobile-nav {
+  background: rgba(255, 153, 0, 0.98) !important;
+  background-image: none !important;
+  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3) !important;
+}
+
+/* Override any inline styles */
+header[style*="background"],
+.header[style*="background"] {
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  background-image: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+}
+
+/* Force override with higher specificity */
+body header.header,
+html body header.header,
+#root header.header,
+#root .header {
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  background-image: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+}
+
+/* NUCLEAR OPTION - HIGHEST SPECIFICITY */
+html body #root header.header,
+html body #root .header,
+html body #root [class*="header"] {
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+  background-image: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+}
+
+/* Override any existing styles */
+* {
+  --header-bg: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%) !important;
+}
+
+/* Force all header elements */
+header,
+.header,
+[class*="header"],
+.header-container,
+.header-logo,
+.header-nav,
+.header-search,
+.header-actions {
+  background: var(--header-bg) !important;
+  background-image: var(--header-bg) !important;
+}

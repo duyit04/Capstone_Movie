@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../../services/api";
-import { Tabs } from "antd";
+import { Tabs, Spin, Alert, Card, Typography, Space, Form, Input, Button, message } from "antd";
+import { UserOutlined, LoadingOutlined, SaveOutlined, LogoutOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,7 +18,7 @@ export default function ProfilePage() {
   
   // Get user information from localStorage
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("ACCESS_TOKEN");
     
     if (!token) {
       navigate("/login", { replace: true });
@@ -36,13 +40,22 @@ export default function ProfilePage() {
         );
         
         setUserInfo(result.data.content);
+        // Set form values
+        form.setFieldsValue({
+          taiKhoan: result.data.content.taiKhoan,
+          hoTen: result.data.content.hoTen,
+          email: result.data.content.email,
+          soDt: result.data.content.soDT,
+          maLoaiNguoiDung: result.data.content.maLoaiNguoiDung
+        });
       } catch (err) {
+        console.error('Lỗi khi lấy thông tin người dùng:', err);
         setError(err.response?.data?.content || "Không thể lấy thông tin người dùng");
         
         // If token is expired or invalid, redirect to login
         if (err.response?.status === 401) {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("userInfo");
+          localStorage.removeItem("ACCESS_TOKEN");
+          localStorage.removeItem("USER_INFO");
           navigate("/login", { replace: true });
         }
       } finally {
@@ -51,12 +64,10 @@ export default function ProfilePage() {
     };
     
     fetchUserInfo();
-  }, [navigate]);
-  
-  const handleUpdateProfile = async (event) => {
-    event.preventDefault();
-    
-    const token = localStorage.getItem("accessToken");
+  }, [navigate, form]);
+
+  const handleUpdateProfile = async (values) => {
+    const token = localStorage.getItem("ACCESS_TOKEN");
     if (!token) return;
     
     try {
@@ -66,12 +77,12 @@ export default function ProfilePage() {
       
       const formData = {
         taiKhoan: userInfo.taiKhoan, // Cannot change username
-        matKhau: event.target.matKhau.value,
-        email: event.target.email.value,
-        soDt: event.target.soDt.value,
+        matKhau: values.matKhau,
+        email: values.email,
+        soDt: values.soDt,
         maNhom: userInfo.maNhom,
         maLoaiNguoiDung: userInfo.maLoaiNguoiDung, // Cannot change user type
-        hoTen: event.target.hoTen.value
+        hoTen: values.hoTen
       };
       
       const result = await api.put(
@@ -86,25 +97,107 @@ export default function ProfilePage() {
       
       // Update userInfo in state and localStorage
       setUserInfo(result.data.content);
-      localStorage.setItem("userInfo", JSON.stringify(result.data.content));
+      localStorage.setItem("USER_INFO", JSON.stringify(result.data.content));
       
       setUpdateSuccess(true);
+      message.success('Cập nhật thông tin thành công!');
     } catch (err) {
-      setUpdateError(err.response?.data?.content || "Không thể cập nhật thông tin");
+      const errorMsg = err.response?.data?.content || "Không thể cập nhật thông tin";
+      setUpdateError(errorMsg);
+      message.error(errorMsg);
     } finally {
       setUpdateLoading(false);
     }
   };
   
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("userInfo");
+    localStorage.removeItem("ACCESS_TOKEN");
+    localStorage.removeItem("USER_INFO");
     navigate("/login", { replace: true });
   };
 
-  if (loading) return <div className="container mx-auto py-10 text-center">Loading...</div>;
-  if (error) return <div className="container mx-auto py-10 text-center text-red-600">{error}</div>;
-  if (!userInfo) return <div className="container mx-auto py-10 text-center">No data found</div>;
+  // Loading state
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '60vh',
+        flexDirection: 'column',
+        gap: 16
+      }}>
+        <Spin 
+          indicator={<LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />} 
+          size="large" 
+        />
+        <Text type="secondary" style={{ fontSize: 16 }}>
+          Đang tải thông tin tài khoản...
+        </Text>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
+        <Alert
+          message="Lỗi"
+          description={error}
+          type="error"
+          showIcon
+          action={
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ 
+                background: '#ff4d4f', 
+                color: 'white', 
+                border: 'none', 
+                padding: '4px 8px', 
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            >
+              Thử lại
+            </button>
+          }
+        />
+      </div>
+    );
+  }
+
+  // No data state
+  if (!userInfo) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '60vh',
+        flexDirection: 'column',
+        gap: 16
+      }}>
+        <UserOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
+        <Text type="secondary" style={{ fontSize: 16 }}>
+          Không tìm thấy thông tin người dùng
+        </Text>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{ 
+            background: '#1890ff', 
+            color: 'white', 
+            border: 'none', 
+            padding: '8px 16px', 
+            borderRadius: 6,
+            cursor: 'pointer'
+          }}
+        >
+          Tải lại trang
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -132,108 +225,107 @@ export default function ProfilePage() {
                       </div>
                     )}
                     
-                    <form onSubmit={handleUpdateProfile}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Tài khoản
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-100"
-                            type="text"
-                            value={userInfo.taiKhoan}
-                            readOnly
-                          />
-                          <p className="text-xs text-gray-500 mt-1">Tài khoản không thể thay đổi</p>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="hoTen">
-                            Họ tên
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="hoTen"
-                            name="hoTen"
-                            type="text"
-                            defaultValue={userInfo.hoTen}
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                            Email
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="email"
-                            name="email"
-                            type="email"
-                            defaultValue={userInfo.email}
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="soDt">
-                            Số điện thoại
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="soDt"
-                            name="soDt"
-                            type="text"
-                            defaultValue={userInfo.soDT}
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="matKhau">
-                            Mật khẩu
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="matKhau"
-                            name="matKhau"
-                            type="password"
-                            placeholder="Nhập mật khẩu mới"
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Loại người dùng
-                          </label>
-                          <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-100"
-                            type="text"
-                            value={userInfo.maLoaiNguoiDung === "KhachHang" ? "Khách hàng" : "Quản trị"}
-                            readOnly
-                          />
-                        </div>
-                      </div>
+                    <Form
+                      form={form}
+                      onFinish={handleUpdateProfile}
+                      layout="vertical"
+                      className="space-y-4"
+                    >
+                      <Form.Item
+                        label="Tài khoản"
+                        name="taiKhoan"
+                        rules={[{ message: 'Tài khoản không thể thay đổi' }]}
+                      >
+                        <Input
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-100"
+                          type="text"
+                          value={userInfo.taiKhoan}
+                          readOnly
+                        />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        label="Họ tên"
+                        name="hoTen"
+                        rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                      >
+                        <Input
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          type="text"
+                          placeholder="Nhập họ tên"
+                        />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[{ type: 'email', message: 'Vui lòng nhập địa chỉ email hợp lệ' }]}
+                      >
+                        <Input
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          type="email"
+                          placeholder="Nhập email"
+                        />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        label="Số điện thoại"
+                        name="soDt"
+                        rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                      >
+                        <Input
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          type="text"
+                          placeholder="Nhập số điện thoại"
+                        />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        label="Mật khẩu"
+                        name="matKhau"
+                        rules={[{ min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }]}
+                      >
+                        <Input.Password
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          placeholder="Nhập mật khẩu mới"
+                        />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        label="Loại người dùng"
+                        name="maLoaiNguoiDung"
+                        rules={[{ required: true, message: 'Vui lòng chọn loại người dùng' }]}
+                      >
+                        <Input
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-100"
+                          type="text"
+                          value={userInfo.maLoaiNguoiDung === "KhachHang" ? "Khách hàng" : "Quản trị"}
+                          readOnly
+                        />
+                      </Form.Item>
                       
                       <div className="mt-6 flex justify-between">
-                        <button
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          icon={updateLoading ? <LoadingOutlined /> : <SaveOutlined />}
                           className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${updateLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          type="submit"
                           disabled={updateLoading}
                         >
                           {updateLoading ? "Đang cập nhật..." : "Cập nhật thông tin"}
-                        </button>
+                        </Button>
                         
-                        <button
-                          type="button"
+                        <Button
+                          type="primary"
+                          danger
+                          icon={<LogoutOutlined />}
                           onClick={handleLogout}
                           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         >
                           Đăng xuất
-                        </button>
+                        </Button>
                       </div>
-                    </form>
+                    </Form>
                   </div>
                 ),
               },
