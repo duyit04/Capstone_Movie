@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, Card, Typography, message, Space, Divider, Row, Col, Modal, notification } from "antd";
 import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import api from "../../../services/api";
+import BearAvatar from "./BearAvatar";
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [mode, setMode] = useState('idle');
+  const [userValue, setUserValue] = useState('');
   
   const onFinish = async (values) => {
     try {
@@ -127,6 +130,7 @@ export default function LoginPage() {
             }}
           >
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <BearAvatar mode={mode} value={userValue} />
               <Title level={2}>Đăng nhập</Title>
               <Text type="secondary">
                 Chào mừng bạn quay trở lại với Movie Booking
@@ -151,6 +155,9 @@ export default function LoginPage() {
                   size="large"
                   prefix={<UserOutlined />} 
                   placeholder="Tài khoản" 
+                  onFocus={() => setMode('user')}
+                  onBlur={() => setMode('idle')}
+                  onChange={(e) => setUserValue(e.target.value)}
                 />
               </Form.Item>
 
@@ -164,6 +171,8 @@ export default function LoginPage() {
                   size="large"
                   prefix={<LockOutlined />} 
                   placeholder="Mật khẩu" 
+                  onFocus={() => setMode('password')}
+                  onBlur={() => setMode('idle')}
                 />
               </Form.Item>
 

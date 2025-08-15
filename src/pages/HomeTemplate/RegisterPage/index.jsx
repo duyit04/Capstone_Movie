@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, Card, Typography, message, Space, Row, Col, Divider } from "antd";
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserAddOutlined } from "@ant-design/icons";
 import api from "../../../services/api";
+import BearAvatar from "../LoginPage/BearAvatar";
 
 const { Title, Text } = Typography;
 
@@ -10,6 +11,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState('idle');
+  const [userValue, setUserValue] = useState('');
   
   const onFinish = async (values) => {
     try {
@@ -55,6 +58,7 @@ export default function RegisterPage() {
             }}
           >
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <BearAvatar mode={mode} value={userValue} />
               <Title level={2}>Đăng ký tài khoản</Title>
               <Text type="secondary">
                 Tạo tài khoản để đặt vé xem phim và nhận các ưu đãi từ Movie Booking
@@ -79,6 +83,9 @@ export default function RegisterPage() {
                   size="large"
                   prefix={<UserOutlined />} 
                   placeholder="Tài khoản" 
+                  onFocus={() => setMode('user')}
+                  onBlur={() => setMode('idle')}
+                  onChange={(e) => setUserValue(e.target.value)}
                 />
               </Form.Item>
 
@@ -132,6 +139,8 @@ export default function RegisterPage() {
                   size="large"
                   prefix={<LockOutlined />} 
                   placeholder="Mật khẩu" 
+                  onFocus={() => setMode('password')}
+                  onBlur={() => setMode('idle')}
                 />
               </Form.Item>
 
@@ -153,6 +162,8 @@ export default function RegisterPage() {
                   size="large"
                   prefix={<LockOutlined />} 
                   placeholder="Xác nhận mật khẩu" 
+                  onFocus={() => setMode('password')}
+                  onBlur={() => setMode('idle')}
                 />
               </Form.Item>
 

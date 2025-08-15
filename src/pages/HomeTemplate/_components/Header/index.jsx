@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { Layout, Menu, Button, Drawer, Avatar, Dropdown, Space } from "antd";
+import { Layout, Menu, Button, Drawer, Avatar, Dropdown, Space, Switch } from "antd";
 import {
   MenuOutlined,
   UserOutlined,
@@ -15,6 +15,7 @@ export default function Header() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
@@ -43,6 +44,24 @@ export default function Header() {
     };
   }, []);
 
+  // Init theme by stored preference or OS setting, and apply html.dark
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('THEME');
+      const root = document.documentElement;
+      if (stored === 'dark' || stored === 'light') {
+        const dark = stored === 'dark';
+        setIsDark(dark);
+        if (dark) root.classList.add('dark'); else root.classList.remove('dark');
+        return;
+      }
+      const mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      const dark = !!mql?.matches;
+      setIsDark(dark);
+      if (dark) root.classList.add('dark'); else root.classList.remove('dark');
+    } catch (_) {}
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("USER_INFO");
     localStorage.removeItem("ACCESS_TOKEN");
@@ -52,6 +71,18 @@ export default function Header() {
     window.dispatchEvent(new Event('userLoginChange'));
     
     navigate("/login");
+  };
+
+  const toggleTheme = (checked) => {
+    setIsDark(checked);
+    const root = document.documentElement;
+    if (checked) {
+      root.classList.add('dark');
+      localStorage.setItem('THEME', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('THEME', 'light');
+    }
   };
 
   const userMenuItems = [
@@ -75,12 +106,12 @@ export default function Header() {
         <div className="logo">
           <Link to="/" style={{ display: "flex", alignItems: "center" }}>
             <img
-              src="/src/assets/react.svg"
-              alt="Cyber Movie Logo"
+              src="/src/assets/movie.png"
+              alt="Movie Logo"
               style={{ height: 40, marginRight: 10 }}
             />
             <span style={{ color: "#fff", fontSize: "1.5rem", fontWeight: "bold" }}>
-              CYBER MOVIE
+              MOVIE
             </span>
           </Link>
         </div>
@@ -116,7 +147,7 @@ export default function Header() {
           />
           
           <Drawer
-            title="CYBER MOVIE"
+            title="MOVIE"
             placement="right"
             onClose={() => setMobileMenuOpen(false)}
             open={mobileMenuOpen}
@@ -159,36 +190,44 @@ export default function Header() {
           </Drawer>
         </div>
 
-        {/* Authentication buttons */}
+        {/* Authentication buttons + Theme switch */}
         <div className="auth-buttons" style={{ display: "flex", alignItems: "center" }}>
-          {!user ? (
-            <Space>
-              <Button 
-                type="primary" 
-                ghost 
-                icon={<LoginOutlined />} 
-                onClick={() => navigate("/login")}
-              >
-                Đăng nhập
-              </Button>
-              <Button 
-                type="primary" 
-                icon={<UserAddOutlined />} 
-                onClick={() => navigate("/register")}
-              >
-                Đăng ký
-              </Button>
-            </Space>
-          ) : (
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <a onClick={e => e.preventDefault()}>
-                <Space>
-                  <Avatar icon={<UserOutlined />} />
-                  <span style={{ color: "#fff" }}>{user.hoTen}</span>
-                </Space>
-              </a>
-            </Dropdown>
-          )}
+          <Space size="middle">
+            <Switch
+              checked={isDark}
+              onChange={toggleTheme}
+              checkedChildren="🌙"
+              unCheckedChildren="☀️"
+            />
+            {!user ? (
+              <>
+                <Button 
+                  type="primary" 
+                  ghost 
+                  icon={<LoginOutlined />} 
+                  onClick={() => navigate("/login")}
+                >
+                  Đăng nhập
+                </Button>
+                <Button 
+                  type="primary" 
+                  icon={<UserAddOutlined />} 
+                  onClick={() => navigate("/register")}
+                >
+                  Đăng ký
+                </Button>
+              </>
+            ) : (
+              <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+                <a onClick={e => e.preventDefault()}>
+                  <Space>
+                    <Avatar icon={<UserOutlined />} />
+                    <span style={{ color: "#fff" }}>{user.hoTen}</span>
+                  </Space>
+                </a>
+              </Dropdown>
+            )}
+          </Space>
         </div>
       </div>
     </AntHeader>

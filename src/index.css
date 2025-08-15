@@ -3,6 +3,7 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 
+/* Active link helper */
 .my-active {
   color: white !important;
   background-color: red !important;
@@ -17,9 +18,7 @@
   transform: translateX(-50%) !important;
 }
 
-.ant-message-notice {
-  margin-bottom: 8px;
-}
+.ant-message-notice { margin-bottom: 8px; }
 
 .ant-message-notice-content {
   border-radius: 8px;
@@ -35,56 +34,131 @@
   color: white;
   border: none;
 }
-
 .ant-message-error .ant-message-notice-content {
   background: linear-gradient(135deg, #ff4d4f, #ff7875);
   color: white;
   border: none;
 }
-
 .ant-message-warning .ant-message-notice-content {
   background: linear-gradient(135deg, #faad14, #ffc53d);
   color: white;
   border: none;
 }
-
 .ant-message-info .ant-message-notice-content {
   background: linear-gradient(135deg, #1890ff, #40a9ff);
   color: white;
   border: none;
 }
 
-/* Đảm bảo thông báo hiển thị trên cùng */
+/* Ensure message visible above all */
 .ant-message-notice-wrapper {
   z-index: 9999 !important;
   position: relative;
 }
 
-/* Animation cho thông báo */
-.ant-message-notice-enter {
-  opacity: 0;
-  transform: translateY(-20px);
-}
+/* Message animations */
+.ant-message-notice-enter { opacity: 0; transform: translateY(-20px); }
+.ant-message-notice-enter-active { opacity: 1; transform: translateY(0); transition: all 0.3s ease-out; }
+.ant-message-notice-exit { opacity: 1; transform: translateY(0); }
+.ant-message-notice-exit-active { opacity: 0; transform: translateY(-20px); transition: all 0.3s ease-in; }
 
-.ant-message-notice-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.3s ease-out;
-}
+.ant-message-notice-content { position: relative; z-index: 10000 !important; }
 
-.ant-message-notice-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* ================= Global Base Typography (Light) ================= */
+body { color: #111827; background-color: #ffffff; }
 
-.ant-message-notice-exit-active {
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.3s ease-in;
-}
+h1, h2, h3, h4, h5, h6 { color: #0f172a; }
 
-/* Đảm bảo thông báo không bị che bởi các element khác */
-.ant-message-notice-content {
-  position: relative;
-  z-index: 10000 !important;
+p, li, span, small, div { color: inherit; }
+small { color: #4b5563; }
+
+a { color: #1d4ed8; }
+a:hover { color: #1e40af; }
+
+/* ================= Global Base Typography (Dark) ================= */
+:root.dark body { background-color: #0b0b0b; color: #e5e7eb; }
+:root.dark h1, :root.dark h2, :root.dark h3, :root.dark h4, :root.dark h5, :root.dark h6 { color: #f3f4f6; }
+:root.dark small { color: #9ca3af; }
+:root.dark a { color: #93c5fd; }
+:root.dark a:hover { color: #bfdbfe; }
+
+/* ================= Layout ================= */
+:root.dark .ant-layout, :root.dark .ant-layout-content { background: transparent !important; color: #e5e7eb; }
+
+/* ================= Drawer ================= */
+:root.dark .ant-drawer .ant-drawer-header { background-color: #111827; color: #e5e7eb; border-bottom-color: #374151; }
+:root.dark .ant-drawer .ant-drawer-body { background-color: #111827; color: #e5e7eb; }
+
+/* ================= Menu ================= */
+:root.dark .ant-menu { background: transparent !important; }
+:root.dark .ant-menu-item, :root.dark .ant-menu-submenu-title { color: #e5e7eb !important; }
+:root.dark .ant-menu-item a { color: #e5e7eb !important; }
+:root.dark .ant-menu-item-selected a { color: #93c5fd !important; }
+:root.dark .ant-menu-item:hover a { color: #bfdbfe !important; }
+
+/* ================= Dropdown ================= */
+:root.dark .ant-dropdown-menu { background-color: #111827; color: #e5e7eb; border: 1px solid #374151; }
+:root.dark .ant-dropdown-menu-item { color: #e5e7eb; }
+:root.dark .ant-dropdown-menu-item:hover { background-color: #1f2937; }
+
+/* ================= Modal ================= */
+:root.dark .ant-modal-content, :root.dark .ant-modal-header { background-color: #111827; color: #e5e7eb; border-color: #374151; }
+:root.dark .ant-modal-title { color: #e5e7eb; }
+
+/* ================= Popover & Tooltip ================= */
+:root.dark .ant-popover-inner { background-color: #111827; color: #e5e7eb; border: 1px solid #374151; }
+:root.dark .ant-popover-arrow-content { background-color: #111827; }
+:root.dark .ant-tooltip-inner { background-color: #111827; color: #e5e7eb; }
+:root.dark .ant-tooltip-arrow-content { background-color: #111827; }
+
+/* ================= Inputs / Selects / Pickers ================= */
+:root.dark .ant-input, :root.dark .ant-select-selector, :root.dark .ant-picker, :root.dark .ant-input-affix-wrapper {
+  background-color: #111827 !important; color: #e5e7eb !important; border-color: #374151 !important;
 }
+:root.dark .ant-select-dropdown { background-color: #111827; color: #e5e7eb; border: 1px solid #374151; }
+:root.dark .ant-select-item { color: #e5e7eb; }
+:root.dark .ant-select-item-option-active { background-color: #1f2937; }
+:root.dark .ant-input::placeholder, :root.dark textarea::placeholder { color: #9ca3af !important; }
+
+/* ================= Buttons ================= */
+:root.dark .ant-btn-default { background-color: #1f2937; color: #e5e7eb; border-color: #374151; }
+:root.dark .ant-btn-default:hover { color: #bfdbfe; border-color: #60a5fa; }
+
+/* ================= Cards ================= */
+:root.dark .ant-card { background-color: #111827; color: #e5e7eb; border-color: #374151; }
+
+/* ================= Tabs ================= */
+:root.dark .ant-tabs-tab-btn { color: #e5e7eb; }
+:root.dark .ant-tabs-tab:hover .ant-tabs-tab-btn { color: #bfdbfe; }
+:root.dark .ant-tabs-ink-bar { background-color: #60a5fa; }
+
+/* ================= Pagination ================= */
+:root.dark .ant-pagination { color: #e5e7eb; }
+
+/* ================= Divider ================= */
+:root.dark .ant-divider { border-color: #374151; }
+
+/* ================= Breadcrumb ================= */
+:root.dark .ant-breadcrumb { color: #e5e7eb; }
+:root.dark .ant-breadcrumb a { color: #bfdbfe; }
+:root.dark .ant-breadcrumb-separator { color: #9ca3af; }
+:root.dark .ant-breadcrumb > span:last-child { color: #f3f4f6; }
+
+/* ================= Table ================= */
+:root.dark .ant-table { color: #e5e7eb; }
+:root.dark .ant-table-thead > tr > th { background-color: #0f172a; color: #e5e7eb; border-color: #374151; }
+:root.dark .ant-table-tbody > tr > td { background-color: #111827; color: #e5e7eb; border-color: #374151; }
+:root.dark .ant-table-tbody > tr:hover > td { background-color: #1f2937; }
+
+/* ================= Tag ================= */
+:root.dark .ant-tag-default { background-color: #1f2937; border-color: #374151; color: #e5e7eb; }
+
+/* ================= Alert ================= */
+:root.dark .ant-alert { background-color: #111827; border-color: #374151; color: #e5e7eb; }
+:root.dark .ant-alert-message { color: #f3f4f6; }
+:root.dark .ant-alert-description { color: #d1d5db; }
+
+/* ================= Badge / Steps / Form ================= */
+:root.dark .ant-badge-status-text { color: #d1d5db; }
+:root.dark .ant-steps-item-title { color: #e5e7eb; }
+:root.dark .ant-form-item-label > label { color: #e5e7eb; }
