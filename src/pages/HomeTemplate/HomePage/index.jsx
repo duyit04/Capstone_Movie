@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Carousel, Tabs, Pagination } from "antd";
+import { Carousel, Tabs, Pagination, Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { fetchBanners, fetchMovies, fetchCinemas, fetchCinemaSchedules } from "./slice";
 import "./styles.css";
@@ -17,6 +18,8 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("all"); // "all", "nowShowing", "comingSoon"
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(20); // Hiển thị 20 phim mỗi trang
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // For immediate UI updates
   
   useEffect(() => {
     // Fetch all required data for the homepage
@@ -25,13 +28,31 @@ export default function HomePage() {
     dispatch(fetchCinemas());
     dispatch(fetchCinemaSchedules());
   }, [dispatch]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearchKeyword(searchInput);
+      setCurrentPage(1);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
   
-  // Filter movies based on active tab
+  // Filter movies based on active tab and search keyword
   const filteredMovies = movies?.filter((movie) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "nowShowing") return movie.dangChieu;
-    if (activeTab === "comingSoon") return movie.sapChieu;
-    return true;
+    // First filter by tab
+    let matchesTab = true;
+    if (activeTab === "nowShowing") matchesTab = movie.dangChieu;
+    else if (activeTab === "comingSoon") matchesTab = movie.sapChieu;
+    
+    // Then filter by search keyword
+    let matchesSearch = true;
+    if (searchKeyword.trim()) {
+      matchesSearch = movie.tenPhim.toLowerCase().includes(searchKeyword.toLowerCase());
+    }
+    
+    return matchesTab && matchesSearch;
   });
   
   // Calculate pagination
@@ -40,17 +61,35 @@ export default function HomePage() {
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentMovies = filteredMovies?.slice(startIndex, endIndex) || [];
-  
-  // Reset to first page when changing tabs
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
+  
+    if (searchKeyword || searchInput) {
+      setSearchInput("");
+      setSearchKeyword("");
+    }
   };
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchInput(e.target.value);
+  };
+
+  const handleSearchEnter = (e) => {
+    setSearchKeyword(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setSearchKeyword("");
+    setCurrentPage(1);
   };
   
   return (
@@ -67,6 +106,7 @@ export default function HomePage() {
               dotPosition="bottom"
               effect="fade"
               autoplaySpeed={4000}
+              arrows={true}
               className="banner-carousel"
             >
               {banners.map((banner) => (
@@ -99,6 +139,23 @@ export default function HomePage() {
       {/* Movies Section */}
       <div className="mt-8 mb-10">
         <h2 className="text-3xl font-bold mb-3 text-center">Phim chiếu rạp</h2>
+        
+        {/* Movie Search */}
+        <div className="flex justify-center mb-6">
+          <div className="w-full max-w-md">
+            <Input
+              placeholder="Tìm kiếm phim..."
+              value={searchInput}
+              onChange={handleSearchInputChange}
+              onPressEnter={handleSearchEnter}
+              prefix={<SearchOutlined />}
+              allowClear
+              onClear={handleClearSearch}
+              size="large"
+              className="movie-search-input"
+            />
+          </div>
+        </div>
         
         {/* Movie Tabs */}
         <div className="flex justify-center mb-8">
@@ -139,6 +196,25 @@ export default function HomePage() {
           </div>
         </div>
         
+        {/* Search Results Info */}
+        {searchKeyword && (
+          <div className="text-center mb-4">
+            <p className="text-gray-600">
+              {currentMovies && currentMovies.length > 0 
+                ? `Tìm thấy ${totalMovies} kết quả cho "${searchKeyword}"`
+                : `Không tìm thấy phim nào với từ khóa "${searchKeyword}"`
+              }
+            </p>
+          </div>
+        )}
+
+        {/* Search Loading State */}
+        {searchInput && searchInput !== searchKeyword && (
+          <div className="text-center mb-4">
+            <p className="text-gray-500 text-sm">Đang tìm kiếm...</p>
+          </div>
+        )}
+
         {/* Movies Grid */}
         {moviesLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
