@@ -121,20 +121,14 @@ export default function Header() {
             mode="horizontal"
             style={{ background: "transparent", borderBottom: "none" }}
             selectedKeys={[window.location.pathname]}
-          >
-            <Menu.Item key="/">
-              <NavLink to="/" style={{ color: "#fff" }}>Trang chủ</NavLink>
-            </Menu.Item>
-            <Menu.Item key="/list-movie">
-              <NavLink to="/list-movie" style={{ color: "#fff" }}>Phim</NavLink>
-            </Menu.Item>
-            <Menu.Item key="/news">
-              <NavLink to="/news" style={{ color: "#fff" }}>Tin tức</NavLink>
-            </Menu.Item>
-            <Menu.Item key="/about">
-              <NavLink to="/about" style={{ color: "#fff" }}>Giới thiệu</NavLink>
-            </Menu.Item>
-          </Menu>
+            disabledOverflow
+            items={[
+              { key: "/", label: <NavLink to="/" style={{ color: "#fff" }}>Trang chủ</NavLink> },
+              { key: "/about", label: <NavLink to="/about" style={{ color: "#fff" }}>Giới thiệu</NavLink> },
+              { key: "/list-movie", label: <NavLink to="/list-movie" style={{ color: "#fff" }}>Phim</NavLink> },
+              { key: "/news", label: <NavLink to="/news" style={{ color: "#fff" }}>Tin tức</NavLink> },
+            ]}
+          />
         </div>
 
         {/* Menu trên mobile */}
@@ -152,41 +146,22 @@ export default function Header() {
             onClose={() => setMobileMenuOpen(false)}
             open={mobileMenuOpen}
           >
-            <Menu mode="vertical" selectedKeys={[window.location.pathname]}>
-              <Menu.Item key="/">
-                <Link to="/" onClick={() => setMobileMenuOpen(false)}>Trang chủ</Link>
-              </Menu.Item>
-              <Menu.Item key="/list-movie">
-                <Link to="/list-movie" onClick={() => setMobileMenuOpen(false)}>Phim</Link>
-              </Menu.Item>
-              <Menu.Item key="/news">
-                <Link to="/news" onClick={() => setMobileMenuOpen(false)}>Tin tức</Link>
-              </Menu.Item>
-              <Menu.Item key="/about">
-                <Link to="/about" onClick={() => setMobileMenuOpen(false)}>Giới thiệu</Link>
-              </Menu.Item>
-              {!user && (
-                <>
-                  <Menu.Item key="/login">
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <LoginOutlined /> Đăng nhập
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="/register">
-                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                      <UserAddOutlined /> Đăng ký
-                    </Link>
-                  </Menu.Item>
-                </>
-              )}
-              {user && (
-                <Menu.Item key="/profile">
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <UserOutlined /> Thông tin cá nhân
-                  </Link>
-                </Menu.Item>
-              )}
-            </Menu>
+            <Menu
+              mode="vertical"
+              selectedKeys={[window.location.pathname]}
+              items={[
+                { key: "/", label: <Link to="/" onClick={() => setMobileMenuOpen(false)}>Trang chủ</Link> },
+                { key: "/list-movie", label: <Link to="/list-movie" onClick={() => setMobileMenuOpen(false)}>Phim</Link> },
+                { key: "/news", label: <Link to="/news" onClick={() => setMobileMenuOpen(false)}>Tin tức</Link> },
+                { key: "/about", label: <Link to="/about" onClick={() => setMobileMenuOpen(false)}>Giới thiệu</Link> },
+                ...(!user ? [
+                  { key: "/login", label: <Link to="/login" onClick={() => setMobileMenuOpen(false)}><LoginOutlined /> Đăng nhập</Link> },
+                  { key: "/register", label: <Link to="/register" onClick={() => setMobileMenuOpen(false)}><UserAddOutlined /> Đăng ký</Link> },
+                ] : [
+                  { key: "/profile", label: <Link to="/profile" onClick={() => setMobileMenuOpen(false)}><UserOutlined /> Thông tin cá nhân</Link> },
+                ])
+              ]}
+            />
           </Drawer>
         </div>
 

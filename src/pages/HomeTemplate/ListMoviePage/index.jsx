@@ -50,30 +50,33 @@ export default function ListMoviePage() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Danh sách phim</h1>
-      
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-4 justify-center">
+
+      <div className="mb-6 flex justify-center">
+        <div className="inline-flex rounded-md shadow-sm" role="group">
           <button 
-            className={`px-4 py-2 rounded transition-colors ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+            className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === 'all' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'} rounded-l-lg border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white`}
+            aria-pressed={activeTab === 'all'}
             onClick={() => setActiveTab('all')}
           >
             Tất cả phim
           </button>
           <button 
-            className={`px-4 py-2 rounded transition-colors ${activeTab === 'nowShowing' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+            className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === 'nowShowing' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'} border-t border-b border-r border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white`}
+            aria-pressed={activeTab === 'nowShowing'}
             onClick={() => setActiveTab('nowShowing')}
           >
             Phim đang chiếu
           </button>
           <button 
-            className={`px-4 py-2 rounded transition-colors ${activeTab === 'comingSoon' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+            className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === 'comingSoon' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'} rounded-r-lg border-t border-b border-r border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white`}
+            aria-pressed={activeTab === 'comingSoon'}
             onClick={() => setActiveTab('comingSoon')}
           >
             Phim sắp chiếu
           </button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredMovies && filteredMovies.length > 0 ? (
           filteredMovies.map((movie) => <Movie key={movie.maPhim} movieData={movie} />)

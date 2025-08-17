@@ -291,6 +291,18 @@
   border-color: #2563eb;
 }
 
+/* Ensure page number text is readable */
+.custom-pagination .ant-pagination-item a {
+  color: #111827;
+}
+:root.dark .custom-pagination .ant-pagination-item a {
+  color: #e5e7eb;
+}
+.custom-pagination .ant-pagination-item-active a,
+.custom-pagination .ant-pagination-item-active:hover a {
+  color: #ffffff !important;
+}
+
 .custom-pagination .ant-pagination-prev,
 .custom-pagination .ant-pagination-next {
   border-radius: 8px;

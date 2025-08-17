@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Carousel, Tabs, Pagination, Spin } from "antd";
+import { Carousel, Tabs, Pagination, Spin, Input } from "antd";
 import { Link } from "react-router-dom";
 import { fetchBanners, fetchMovies, fetchCinemas, fetchCinemaSchedules } from "./slice";
 import "./styles.css";
@@ -19,6 +19,9 @@ export default function HomePage() {
   const [pageSize] = useState(20); // Hiển thị 20 phim mỗi trang
   const carouselRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  // State for search keyword (to avoid reference errors even when no search UI is rendered here)
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     // Fetch all required data for the homepage
@@ -67,6 +70,18 @@ export default function HomePage() {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Global initial loading: show one spinner instead of multiple section spinners
+  const isGlobalLoading = (bannersLoading || moviesLoading || cinemasLoading || schedulesLoading) && !(banners?.length || movies?.length || cinemas?.length || cinemaSchedules?.length);
+  if (isGlobalLoading) {
+    return (
+      <div className="container mx-auto pb-10">
+        <div className="py-16 flex items-center justify-center">
+          <Spin size="large" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto pb-10">
@@ -173,6 +188,19 @@ export default function HomePage() {
       <div className="mt-8 mb-10">
         <h2 className="text-3xl font-bold mb-3 text-center text-gray-900 dark:text-gray-100">Phim chiếu rạp</h2>
 
+        {/* Search */}
+        <div className="flex justify-center mb-4">
+          <Input.Search
+            value={searchInput}
+            onChange={(e) => { setSearchInput(e.target.value); setSearchKeyword(e.target.value.trim()); setCurrentPage(1); }}
+            placeholder="Tìm tên phim..."
+            allowClear
+            enterButton="Tìm kiếm"
+            onSearch={(val) => { setSearchInput(val); setSearchKeyword(val.trim()); setCurrentPage(1); }}
+            style={{ maxWidth: 480, width: '100%' }}
+          />
+        </div>
+
         {/* Movie Tabs */}
         <div className="flex justify-center mb-8">
           <div className="inline-flex rounded-md shadow-sm" role="group">
@@ -211,10 +239,11 @@ export default function HomePage() {
             </button> */}
             <button
               type="button"
-              className={`px-4 py-2 text-base md:text-sm font-semibold ${activeTab === "all"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-black dark:bg-surface dark:text-white"
-                } rounded-l-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === "all"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+                } rounded-l-lg border border-gray-300 dark:border-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              aria-pressed={activeTab === "all"}
               onClick={() => handleTabChange("all")}
             >
               Tất cả
@@ -222,10 +251,11 @@ export default function HomePage() {
 
             <button
               type="button"
-              className={`px-4 py-2 text-base md:text-sm font-semibold ${activeTab === "nowShowing"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-black dark:bg-surface dark:text-white"
-                } border-t border-b border-r border-gray-200 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === "nowShowing"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+                } border-t border-b border-r border-gray-300 dark:border-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              aria-pressed={activeTab === "nowShowing"}
               onClick={() => handleTabChange("nowShowing")}
             >
               Đang chiếu
@@ -233,10 +263,11 @@ export default function HomePage() {
 
             <button
               type="button"
-              className={`px-4 py-2 text-base md:text-sm font-semibold ${activeTab === "comingSoon"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-black dark:bg-surface dark:text-white"
-                } rounded-r-lg border-t border-b border-r border-gray-200 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              className={`px-4 py-2 text-base md:text-sm font-semibold transition-colors ${activeTab === "comingSoon"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+                } rounded-r-lg border-t border-b border-r border-gray-300 dark:border-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-surface`}
+              aria-pressed={activeTab === "comingSoon"}
               onClick={() => handleTabChange("comingSoon")}
             >
               Sắp chiếu
