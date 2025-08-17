@@ -30,10 +30,18 @@ export default function HomePage() {
 
   // Filter movies based on active tab
   const filteredMovies = movies?.filter((movie) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "nowShowing") return movie.dangChieu;
-    if (activeTab === "comingSoon") return movie.sapChieu;
-    return true;
+    // First filter by tab
+    let matchesTab = true;
+    if (activeTab === "nowShowing") matchesTab = movie.dangChieu;
+    else if (activeTab === "comingSoon") matchesTab = movie.sapChieu;
+    
+    // Then filter by search keyword
+    let matchesSearch = true;
+    if (searchKeyword.trim()) {
+      matchesSearch = movie.tenPhim.toLowerCase().includes(searchKeyword.toLowerCase());
+    }
+    
+    return matchesTab && matchesSearch;
   });
 
   // Calculate pagination
@@ -47,6 +55,11 @@ export default function HomePage() {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
+  
+    if (searchKeyword || searchInput) {
+      setSearchInput("");
+      setSearchKeyword("");
+    }
   };
 
   // Handle page change
@@ -74,6 +87,7 @@ export default function HomePage() {
               centerMode
               centerPadding="18%"
               autoplaySpeed={4000}
+              arrows={true}
               className="banner-carousel"
               ref={carouselRef}
               beforeChange={(_, to) => setCurrentSlide(to)}

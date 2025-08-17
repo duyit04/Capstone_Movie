@@ -1,14 +1,74 @@
 /* Banner styles */
-.banner-container {
-  position: relative;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
 
 /* Enhanced banner styling for movie banners */
 .banner-carousel {
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Banner carousel container */
+.banner-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Navigation arrows styling */
+.banner-carousel .slick-prev,
+.banner-carousel .slick-next {
+  width: 50px !important;
+  height: 50px !important;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-radius: 50% !important;
+  transition: background-color 0.3s ease !important;
+  border: none !important;
+  outline: none !important;
+  position: absolute !important;
+}
+
+.banner-carousel .slick-prev:before,
+.banner-carousel .slick-next:before {
+  content: '' !important;
+  display: none !important;
+}
+
+.banner-carousel .slick-prev:after,
+.banner-carousel .slick-next:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.banner-carousel .slick-prev:after {
+  border-color: transparent white transparent transparent;
+  border-width: 8px 12px 8px 0;
+  margin-left: -2px;
+}
+
+.banner-carousel .slick-next:after {
+  border-color: transparent transparent transparent white;
+  border-width: 8px 0 8px 12px;
+  margin-left: 2px;
+}
+
+.banner-carousel .slick-prev:hover,
+.banner-carousel .slick-next:hover {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.banner-carousel .slick-prev {
+  left: 20px !important;
+}
+
+.banner-carousel .slick-next {
+  right: 20px !important;
 }
 
 /* Styled dots hidden (using thumbs) */
@@ -208,7 +268,8 @@
 
 .custom-pagination .ant-pagination-item:hover {
   border-color: #3b82f6;
-  transform: translateY(-2px);
+  transform: scale(1.1);
+  transform-origin: center;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 :root.dark .custom-pagination .ant-pagination-item:hover {
@@ -245,7 +306,8 @@
 .custom-pagination .ant-pagination-next:hover {
   border-color: #3b82f6;
   color: #3b82f6;
-  transform: translateY(-2px);
+  transform: scale(1.1);
+  transform-origin: center;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 :root.dark .custom-pagination .ant-pagination-prev:hover,
