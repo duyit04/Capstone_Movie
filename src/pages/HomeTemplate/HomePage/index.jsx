@@ -120,7 +120,7 @@ export default function HomePage() {
                     alt={`Banner ${banner.maBanner}`}
                     className="w-full h-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-105"
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/1920x1080?text=Banner+Image";
+                      e.target.src = "https://placehold.co/1920x1080?text=Banner+Image";
                     }}
                   />
                   <div className="banner-overlay"></div>
@@ -171,7 +171,7 @@ export default function HomePage() {
                   <img
                     src={b.hinhAnh}
                     alt={`thumb-${i}`}
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/80x120?text=No+Img'; }}
+                    onError={(e) => { e.target.src = 'https://placehold.co/80x120?text=No+Img'; }}
                   />
                 </button>
               ))}
@@ -293,7 +293,7 @@ export default function HomePage() {
                     className="w-full h-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/300x450?text=No+Image";
+                      e.target.src = "https://placehold.co/300x450?text=No+Image";
                     }}
                   />
                   <div className="gc-rating">
@@ -363,7 +363,7 @@ export default function HomePage() {
                       alt={cinema.tenHeThongRap}
                       className="w-12 h-12 mr-2"
                       onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/48?text=Cinema";
+                        e.target.src = "https://placehold.co/48?text=Cinema";
                       }}
                     />
                     <span className="font-medium text-gray-800 dark:text-gray-100">{cinema.tenHeThongRap}</span>
@@ -392,7 +392,7 @@ export default function HomePage() {
                                   alt={movie.tenPhim}
                                   className="w-16 h-24 object-cover rounded mr-3"
                                   onError={(e) => {
-                                    e.target.src = "https://via.placeholder.com/64x96?text=Movie";
+                                    e.target.src = "https://placehold.co/64x96?text=Movie";
                                   }}
                                 />
                                 <div>

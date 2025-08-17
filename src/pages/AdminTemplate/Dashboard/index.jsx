@@ -124,7 +124,7 @@ export default function Dashboard() {
             border: '2px solid #f0f0f0'
           }}
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/80x120/cccccc/666666?text=No+Image';
+            e.target.src = 'https://placehold.co/80x120/cccccc/666666?text=No+Image';
           }}
         />
       )

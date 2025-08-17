@@ -13,7 +13,7 @@ export default function Movie({ movieData }) {
           className="w-full h-full object-cover"
           loading="lazy"
           onError={(e) => {
-            e.target.src = "https://via.placeholder.com/300x450?text=No+Image";
+            e.target.src = "https://placehold.co/300x450?text=No+Image";
           }}
         />
 

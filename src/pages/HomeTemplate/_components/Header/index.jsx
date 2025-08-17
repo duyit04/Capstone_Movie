@@ -8,6 +8,7 @@ import {
   LoginOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
+import logo from "../../../../assets/movie.png";
 
 const { Header: AntHeader } = Layout;
 
@@ -106,7 +107,7 @@ export default function Header() {
         <div className="logo">
           <Link to="/" style={{ display: "flex", alignItems: "center" }}>
             <img
-              src="/src/assets/movie.png"
+              src={logo}
               alt="Movie Logo"
               style={{ height: 40, marginRight: 10 }}
             />
