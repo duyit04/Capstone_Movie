@@ -68,8 +68,10 @@ export default function TicketRoom() {
     }
 
     // Kiểm tra đăng nhập
-    const userInfo = localStorage.getItem("USER_LOGIN");
-    if (!userInfo) {
+    const userInfo = JSON.parse(localStorage.getItem("USER_INFO") || "{}");
+    const accessToken = localStorage.getItem("ACCESS_TOKEN");
+    
+    if (!userInfo || !accessToken || !userInfo.taiKhoan) {
       message.warning("Vui lòng đăng nhập để đặt vé");
       navigate("/login");
       return;
