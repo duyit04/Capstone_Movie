@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [userValue, setUserValue] = useState('');
   
   const onFinish = async (values) => {
+    console.log("RegisterPage onFinish called with:", values);
     try {
       setLoading(true);
       
@@ -28,18 +29,22 @@ export default function RegisterPage() {
       const formData = {
         taiKhoan: values.taiKhoan,
         matKhau: values.matKhau,
+        xacNhanMatKhau: values.confirmPassword,
         email: values.email,
         soDt: values.soDt,
         maNhom: "GP01", // Sử dụng mã nhóm mặc định
         hoTen: values.hoTen
       };
       
+      console.log("RegisterPage sending payload:", formData);
       await api.post("QuanLyNguoiDung/DangKy", formData);
       
       // Đăng ký thành công
       message.success("Đăng ký thành công! Vui lòng đăng nhập.");
       navigate("/login", { replace: true });
     } catch (err) {
+      console.error("RegisterPage error:", err);
+      console.error("RegisterPage error response:", err.response?.data);
       message.error(err.response?.data?.content || "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
     } finally {
       setLoading(false);

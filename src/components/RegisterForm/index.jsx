@@ -52,15 +52,24 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data) => {
+    console.log("onSubmit called with data:", data);
     try {
       setLoading(true);
       setErrorMessage("");
       
       // Gọi API đăng ký
-      const response = await api.post("/QuanLyNguoiDung/DangKy", {
-        ...data,
+      const payload = {
+        taiKhoan: data.taiKhoan,
+        matKhau: data.matKhau,
+        xacNhanMatKhau: data.xacNhanMatKhau,
+        email: data.email,
+        soDt: data.soDt,
+        hoTen: data.hoTen,
         maNhom: "GP01",
-      });
+      };
+      
+      console.log("Registration payload:", payload);
+      const response = await api.post("/QuanLyNguoiDung/DangKy", payload);
       
       // Xử lý thành công
       navigate("/login", { 
@@ -71,6 +80,7 @@ export default function RegisterForm() {
     } catch (error) {
       // Xử lý lỗi
       console.error("Đăng ký thất bại:", error);
+      console.error("Error response:", error.response?.data);
       setErrorMessage(
         error.response?.data?.content || 
         "Đăng ký thất bại. Vui lòng thử lại sau."
