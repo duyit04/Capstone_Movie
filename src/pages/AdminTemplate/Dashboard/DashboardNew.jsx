@@ -5,6 +5,7 @@ import { UserOutlined, VideoCameraOutlined, CalendarOutlined, DollarOutlined, Ey
 import { motion } from "framer-motion";
 import api from "../../../services/api";
 import "./styles.css";
+import { DEFAULT_GROUP_CODE } from "../../../config/constants";
 
 const DashboardNew = () => {
   const [stats, setStats] = useState(null);
@@ -25,8 +26,8 @@ const DashboardNew = () => {
     try {
       // Fire both requests in parallel
       const [moviesResponse, usersResponse] = await Promise.all([
-        api.get("/QuanLyPhim/LayDanhSachPhim?maNhom=GP01"),
-        api.get("/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=GP01")
+        api.get(`/QuanLyPhim/LayDanhSachPhim?maNhom=${DEFAULT_GROUP_CODE}`),
+        api.get(`/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${DEFAULT_GROUP_CODE}`)
       ]);
 
       const movies = moviesResponse?.data?.content || [];
@@ -107,8 +108,8 @@ const DashboardNew = () => {
       
       setRecentMovies(recent);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || "Không thể tải dữ liệu";
-      message.error(`Lỗi: ${errorMessage}`);
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || error.message || "Không thể tải dữ liệu";
+      message.error(errorMessage);
       setMovieStats({ total: 0, nowShowing: 0, comingSoon: 0 });
       setUserStats({ total: 0 });
       setRecentMovies([]);

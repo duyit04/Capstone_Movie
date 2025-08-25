@@ -16,6 +16,7 @@ import {
   Statistic,
   Tag
 } from "antd";
+import { DEFAULT_GROUP_CODE } from "../../../config/constants";
 import { 
   UserOutlined, 
   SaveOutlined, 
@@ -99,10 +100,10 @@ export default function AdminProfilePage() {
       localStorage.setItem("USER_INFO", JSON.stringify(result.data.content));
       
       message.success('Cập nhật thông tin thành công!');
-    } catch (err) {
-      const errorMsg = err.response?.data?.content || "Không thể cập nhật thông tin";
-      message.error(errorMsg);
-    } finally {
+          } catch (err) {
+        const errorMessage = err.response?.data?.content || err.response?.data?.message || "Không thể cập nhật thông tin";
+        message.error(errorMessage);
+      } finally {
       setUpdateLoading(false);
     }
   };
@@ -167,7 +168,7 @@ export default function AdminProfilePage() {
                 />
                 <Statistic 
                   title="Nhóm" 
-                  value={userInfo.maNhom || "GP01"} 
+                  value={userInfo.maNhom || DEFAULT_GROUP_CODE} 
                   valueStyle={{ fontSize: '16px' }}
                 />
               </Space>

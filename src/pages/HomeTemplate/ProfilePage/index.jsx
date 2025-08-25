@@ -102,9 +102,9 @@ export default function ProfilePage() {
       setUpdateSuccess(true);
       message.success('Cập nhật thông tin thành công!');
     } catch (err) {
-      const errorMsg = err.response?.data?.content || "Không thể cập nhật thông tin";
-      setUpdateError(errorMsg);
-      message.error(errorMsg);
+      const errorMessage = err.response?.data?.content || err.response?.data?.message || "Không thể cập nhật thông tin";
+      setUpdateError(errorMessage);
+      message.error(errorMessage);
     } finally {
       setUpdateLoading(false);
     }

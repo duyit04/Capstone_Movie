@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Form, Input, Button, DatePicker, InputNumber, Switch, Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Form, Input, Button, DatePicker, InputNumber, Switch, Upload, message, notification, Modal } from "antd";
+import { UploadOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import api from "../../../../services/api";
 import moment from "moment";
+import { DEFAULT_GROUP_CODE } from "../../../../config/constants";
 
 export default function AddFilm() {
   const navigate = useNavigate();
@@ -12,17 +13,130 @@ export default function AddFilm() {
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   
+  // Tạo API cho notification
+  const [notificationApi, contextHolder] = notification.useNotification();
+  
+  // Hàm xử lý lỗi chung
+  const handleError = (error, action) => {
+    console.error(`❌ Lỗi khi ${action}:`, error);
+    
+    // Xử lý các loại lỗi khác nhau
+    if (error.response) {
+      // Lỗi từ server
+      const status = error.response.status;
+      const errorMessage = error.response.data?.content || error.response.data?.message || 'Lỗi không xác định';
+      
+      console.log('📊 Chi tiết lỗi server:', {
+        status: status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      
+      // Hiển thị thông báo lỗi dạng notification
+      notificationApi.error({
+        message: `Lỗi ${status}: Không thể ${action}`,
+        description: errorMessage,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi chi tiết
+      Modal.error({
+        title: `Không thể ${action}`,
+        content: (
+          <div>
+            <p><strong>Mã lỗi:</strong> {status}</p>
+            <p><strong>Chi tiết:</strong> {errorMessage}</p>
+            {status === 401 && <p><strong>Lưu ý:</strong> Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>}
+            {status === 403 && <p><strong>Lưu ý:</strong> Bạn không có quyền thực hiện thao tác này.</p>}
+            {status === 500 && <p><strong>Lưu ý:</strong> Có lỗi xảy ra ở máy chủ. Vui lòng thử lại sau.</p>}
+          </div>
+        ),
+      });
+      
+      // Hiển thị thông báo dạng message
+      if (status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+      } else if (status === 403) {
+        message.error(`Bạn không có quyền ${action}!`);
+      } else {
+        message.error(errorMessage);
+      }
+    } else if (error.request) {
+      // Lỗi network
+      console.log('🌐 Lỗi network:', error.request);
+      
+      // Hiển thị thông báo lỗi network dạng notification
+      notificationApi.error({
+        message: 'Lỗi kết nối',
+        description: `Không thể kết nối đến server khi ${action}. Vui lòng kiểm tra kết nối mạng của bạn.`,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi network
+      Modal.error({
+        title: 'Lỗi kết nối mạng',
+        content: (
+          <div>
+            <p>Không thể kết nối đến máy chủ khi {action}.</p>
+            <p>Vui lòng kiểm tra:</p>
+            <ul>
+              <li>Kết nối internet của bạn</li>
+              <li>Tường lửa hoặc proxy</li>
+              <li>Máy chủ có thể đang bảo trì</li>
+            </ul>
+          </div>
+        ),
+      });
+      
+      message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
+    } else {
+      // Lỗi khác
+      console.log('❓ Lỗi không xác định:', error.message);
+      
+      // Hiển thị thông báo lỗi không xác định dạng notification
+      notificationApi.error({
+        message: 'Lỗi không xác định',
+        description: error.message || `Đã xảy ra lỗi không xác định khi ${action}.`,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi không xác định
+      Modal.error({
+        title: 'Lỗi không xác định',
+        content: (
+          <div>
+            <p>Đã xảy ra lỗi không xác định khi {action}: {error.message || 'Không có thông tin chi tiết.'}</p>
+            <p>Vui lòng thử lại sau hoặc liên hệ quản trị viên nếu lỗi vẫn tiếp tục.</p>
+          </div>
+        ),
+      });
+      
+      message.error(error.message || "Lỗi không xác định");
+    }
+  };
+  
   useEffect(() => {
     // Check if user is admin
-    const userInfo = localStorage.getItem("USER_INFO");
+    const userInfo = localStorage.getItem("USER_INFO") || localStorage.getItem("USER_LOGIN");
     if (userInfo) {
       const user = JSON.parse(userInfo);
       if (user.maLoaiNguoiDung !== "QuanTri") {
         message.error("Bạn không có quyền truy cập trang này!");
         navigate("/");
+        return;
       }
     } else {
+      message.error("Vui lòng đăng nhập để truy cập trang này!");
       navigate("/admin/login");
+      return;
     }
   }, [navigate]);
   
@@ -61,10 +175,10 @@ export default function AddFilm() {
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ACCESS_TOKEN");
+      const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("accessToken");
       
       if (!token) {
-        message.error("Bạn chưa đăng nhập!");
+        message.error("Không tìm thấy thông tin đăng nhập!");
         navigate("/admin/login");
         return;
       }
@@ -75,6 +189,13 @@ export default function AddFilm() {
         return;
       }
       
+      // Hiển thị loading message
+      message.loading({
+        content: `Đang thêm phim "${values.tenPhim}"...`,
+        duration: 0,
+        key: 'addMovie'
+      });
+      
       const formData = new FormData();
       formData.append("tenPhim", values.tenPhim);
       formData.append("trailer", values.trailer);
@@ -84,7 +205,7 @@ export default function AddFilm() {
       formData.append("sapChieu", values.sapChieu || false);
       formData.append("hot", values.hot || false);
       formData.append("danhGia", values.danhGia);
-      formData.append("maNhom", "GP01");
+      formData.append("maNhom", DEFAULT_GROUP_CODE);
       formData.append("hinhAnh", imageFile);
       
       await api.post("QuanLyPhim/ThemPhimUploadHinh", formData, {
@@ -94,10 +215,62 @@ export default function AddFilm() {
         }
       });
       
-      message.success("Thêm phim thành công!");
-      navigate("/admin/films");
+      // Đóng loading message
+      message.destroy('addMovie');
+      
+      // Thông báo thành công chi tiết hơn
+      message.success({
+        content: `🎬 Phim "${values.tenPhim}" đã được thêm thành công!`,
+        duration: 4,
+        style: {
+          marginTop: '20vh',
+          fontSize: '16px',
+          fontWeight: 'bold',
+        },
+        icon: <span style={{ fontSize: '20px' }}>🎉</span>,
+      });
+      
+      // Hiển thị notification
+      notificationApi.success({
+        message: 'Thêm phim thành công',
+        description: `Phim "${values.tenPhim}" đã được thêm vào hệ thống.`,
+        placement: 'topRight',
+        icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+        duration: 5
+      });
+      
+      // Hiển thị modal thông báo
+      setTimeout(() => {
+        Modal.success({
+          title: 'Thêm phim thành công!',
+          content: `Phim "${values.tenPhim}" đã được thêm vào hệ thống.`,
+        });
+      }, 300);
+      
+      // Hiển thị thông tin chi tiết về phim đã thêm
+      console.log('🎬 Phim đã được thêm thành công:', {
+        tenPhim: values.tenPhim,
+        ngayKhoiChieu: values.ngayKhoiChieu,
+        dangChieu: values.dangChieu,
+        sapChieu: values.sapChieu,
+        hot: values.hot,
+        danhGia: values.danhGia
+      });
+      
+      // Reset form và chuyển về trang quản lý phim
+      form.resetFields();
+      setImageFile(null);
+      setPreviewImage(null);
+      
+      // Chuyển về trang quản lý phim sau 1 giây để người dùng thấy thông báo
+      setTimeout(() => {
+        navigate("/admin/films");
+      }, 1000);
     } catch (err) {
       console.error("Failed to add movie:", err);
+      
+      // Đóng loading message nếu có
+      message.destroy('addMovie');
       
       // Kiểm tra nếu token hết hạn hoặc không hợp lệ
       if (err.response?.status === 401) {
@@ -106,7 +279,8 @@ export default function AddFilm() {
         return;
       }
       
-      message.error("Không thể thêm phim: " + (err.response?.data?.content || err.message));
+      // Sử dụng hàm xử lý lỗi chung
+      handleError(err, `thêm phim "${values.tenPhim}"`);
     } finally {
       setLoading(false);
     }
@@ -114,6 +288,7 @@ export default function AddFilm() {
   
   return (
     <div className="container mx-auto py-8">
+      {contextHolder} {/* Thêm contextHolder để hiển thị notification */}
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-6">Thêm phim mới</h1>
         
@@ -198,21 +373,59 @@ export default function AddFilm() {
             
             <div className="flex flex-col gap-4">
               <Form.Item
-                name="dangChieu"
-                label="Đang chiếu"
-                valuePropName="checked"
+                name="trangThai"
+                label="Trạng thái phim"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái phim!" }]}
               >
-                <Switch />
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="trangThai"
+                      value="dangChieu"
+                      className="mr-2"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          form.setFieldsValue({
+                            dangChieu: true,
+                            sapChieu: false
+                          });
+                        }
+                      }}
+                    />
+                    <span className="text-green-600 font-medium">Đang chiếu</span>
+                  </label>
+                  
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="trangThai"
+                      value="sapChieu"
+                      className="mr-2"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          form.setFieldsValue({
+                            dangChieu: false,
+                            sapChieu: true
+                          });
+                        }
+                      }}
+                    />
+                    <span className="text-blue-600 font-medium">Sắp chiếu</span>
+                  </label>
+                </div>
               </Form.Item>
               
-              <Form.Item
-                name="sapChieu"
-                label="Sắp chiếu"
-                valuePropName="checked"
-              >
-                <Switch />
+              {/* Hidden fields để gửi dữ liệu */}
+              <Form.Item name="dangChieu" hidden>
+                <input type="hidden" />
               </Form.Item>
               
+              <Form.Item name="sapChieu" hidden>
+                <input type="hidden" />
+              </Form.Item>
+              
+              {/* Trạng thái Hot - có thể chọn hoặc không */}
               <Form.Item
                 name="hot"
                 label="Hot"

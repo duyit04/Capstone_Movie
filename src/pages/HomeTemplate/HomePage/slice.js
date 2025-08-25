@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../services/api";
+import { DEFAULT_GROUP_CODE } from "../../../config/constants";
 
 // Thunk để lấy danh sách banner
 export const fetchBanners = createAsyncThunk(
@@ -19,8 +20,31 @@ export const fetchMovies = createAsyncThunk(
   "home/fetchMovies",
   async (_, { rejectWithValue }) => {
     try {
-      const result = await api.get("QuanLyPhim/LayDanhSachPhim?maNhom=GP01");
-      return result.data.content;
+      const result = await api.get(`QuanLyPhim/LayDanhSachPhim?maNhom=${DEFAULT_GROUP_CODE}`);
+      
+      // Xử lý dữ liệu để đảm bảo mỗi phim chỉ có 1 trạng thái duy nhất
+      const processedMovies = result.data.content.map(movie => {
+        // Tạo bản sao mới để tránh thay đổi dữ liệu gốc
+        const processedMovie = { ...movie };
+        
+        // Logic xử lý trạng thái: ưu tiên "đang chiếu" nếu có cả 2
+        if (processedMovie.dangChieu === true && processedMovie.sapChieu === true) {
+          processedMovie.sapChieu = false;
+          console.log(`Phim "${processedMovie.tenPhim}" có cả 2 trạng thái, đã loại bỏ "sắp chiếu"`);
+        }
+        
+        // Đảm bảo chỉ có 1 trạng thái duy nhất
+        if (processedMovie.dangChieu === true) {
+          processedMovie.sapChieu = false;
+        } else if (processedMovie.sapChieu === true) {
+          processedMovie.dangChieu = false;
+        }
+        
+        return processedMovie;
+      });
+      
+      console.log('Đã xử lý', processedMovies.length, 'phim để đảm bảo trạng thái duy nhất');
+      return processedMovies;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -45,7 +69,7 @@ export const fetchCinemaSchedules = createAsyncThunk(
   "home/fetchCinemaSchedules",
   async (_, { rejectWithValue }) => {
     try {
-      const result = await api.get("QuanLyRap/LayThongTinLichChieuHeThongRap?maNhom=GP01");
+      const result = await api.get(`QuanLyRap/LayThongTinLichChieuHeThongRap?maNhom=${DEFAULT_GROUP_CODE}`);
       return result.data.content;
     } catch (error) {
       return rejectWithValue(error.response.data);

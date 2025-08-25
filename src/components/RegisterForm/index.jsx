@@ -8,6 +8,7 @@ import api from "../../services/api";
 import { Button } from "../../components/ui/button";
 import { useTheme } from '../../context/ThemeContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
+import { DEFAULT_GROUP_CODE } from "../../config/constants";
 
 // Định nghĩa schema validation với Zod
 const registerSchema = z.object({
@@ -59,7 +60,7 @@ export default function RegisterForm() {
       // Gọi API đăng ký
       const response = await api.post("/QuanLyNguoiDung/DangKy", {
         ...data,
-        maNhom: "GP01",
+        maNhom: DEFAULT_GROUP_CODE,
       });
       
       // Xử lý thành công

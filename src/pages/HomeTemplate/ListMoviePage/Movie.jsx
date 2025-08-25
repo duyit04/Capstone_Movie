@@ -25,7 +25,16 @@ export default function Movie({ movieData }) {
         </div>
 
         <div className="gc-ribbon">
-          {movieData?.dangChieu ? 'Đang chiếu' : movieData?.sapChieu ? 'Sắp chiếu' : 'Phim'}
+          {(() => {
+            // Đảm bảo mỗi phim chỉ có 1 trạng thái duy nhất
+            if (movieData?.dangChieu === true && movieData?.sapChieu !== true) {
+              return 'Đang chiếu';
+            } else if (movieData?.sapChieu === true && movieData?.dangChieu !== true) {
+              return 'Sắp chiếu';
+            } else {
+              return 'Phim';
+            }
+          })()}
         </div>
 
         <div className="gc-overlay">

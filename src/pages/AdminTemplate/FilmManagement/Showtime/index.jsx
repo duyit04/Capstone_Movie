@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Form, Button, Select, DatePicker, InputNumber, message } from "antd";
+import { Form, Button, Select, DatePicker, InputNumber, message, notification, Modal, Space, Alert, Result, Spin, Card } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../../services/api";
 import moment from "moment";
+import { DEFAULT_GROUP_CODE } from "../../../../config/constants";
 
 const { Option } = Select;
 
@@ -19,6 +21,116 @@ export default function ShowtimeManagement() {
   const [movies, setMovies] = useState([]);
   const [selectedMovieId, setSelectedMovieId] = useState(id || null);
   
+  // Tạo API cho notification
+  const [notificationApi, contextHolder] = notification.useNotification();
+  
+  // Hàm xử lý lỗi chung
+  const handleError = (error, action) => {
+    console.error(`❌ Lỗi khi ${action}:`, error);
+    
+    // Xử lý các loại lỗi khác nhau
+    if (error.response) {
+      // Lỗi từ server
+      const status = error.response.status;
+      const errorMessage = error.response.data?.content || error.response.data?.message || 'Lỗi không xác định';
+      
+      console.log('📊 Chi tiết lỗi server:', {
+        status: status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      
+      // Hiển thị thông báo lỗi dạng notification
+      notificationApi.error({
+        message: `Lỗi ${status}: Không thể ${action}`,
+        description: errorMessage,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi chi tiết
+      Modal.error({
+        title: `Không thể ${action}`,
+        content: (
+          <div>
+            <p><strong>Mã lỗi:</strong> {status}</p>
+            <p><strong>Chi tiết:</strong> {errorMessage}</p>
+            {status === 401 && <p><strong>Lưu ý:</strong> Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>}
+            {status === 403 && <p><strong>Lưu ý:</strong> Bạn không có quyền thực hiện thao tác này.</p>}
+            {status === 500 && <p><strong>Lưu ý:</strong> Có lỗi xảy ra ở máy chủ. Vui lòng thử lại sau.</p>}
+          </div>
+        ),
+      });
+      
+      // Hiển thị thông báo dạng message
+      if (status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+      } else if (status === 403) {
+        message.error(`Bạn không có quyền ${action}!`);
+      } else {
+        message.error(errorMessage);
+      }
+    } else if (error.request) {
+      // Lỗi network
+      console.log('🌐 Lỗi network:', error.request);
+      
+      // Hiển thị thông báo lỗi network dạng notification
+      notificationApi.error({
+        message: 'Lỗi kết nối',
+        description: `Không thể kết nối đến server khi ${action}. Vui lòng kiểm tra kết nối mạng của bạn.`,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi network
+      Modal.error({
+        title: 'Lỗi kết nối mạng',
+        content: (
+          <div>
+            <p>Không thể kết nối đến máy chủ khi {action}.</p>
+            <p>Vui lòng kiểm tra:</p>
+            <ul>
+              <li>Kết nối internet của bạn</li>
+              <li>Tường lửa hoặc proxy</li>
+              <li>Máy chủ có thể đang bảo trì</li>
+            </ul>
+          </div>
+        ),
+      });
+      
+      message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
+    } else {
+      // Lỗi khác
+      console.log('❓ Lỗi không xác định:', error.message);
+      
+      // Hiển thị thông báo lỗi không xác định dạng notification
+      notificationApi.error({
+        message: 'Lỗi không xác định',
+        description: error.message || `Đã xảy ra lỗi không xác định khi ${action}.`,
+        placement: 'topRight',
+        duration: 10,
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      });
+      
+      // Hiển thị modal thông báo lỗi không xác định
+      Modal.error({
+        title: 'Lỗi không xác định',
+        content: (
+          <div>
+            <p>Đã xảy ra lỗi không xác định khi {action}: {error.message || 'Không có thông tin chi tiết.'}</p>
+            <p>Vui lòng thử lại sau hoặc liên hệ quản trị viên nếu lỗi vẫn tiếp tục.</p>
+          </div>
+        ),
+      });
+      
+      message.error(error.message || "Lỗi không xác định");
+    }
+  };
+  
   useEffect(() => {
     // Debug info
     console.log("Showtime management loaded. Film ID:", id);
@@ -33,6 +145,19 @@ export default function ShowtimeManagement() {
       setSelectedMovieId(id);
       fetchMovieInfo(id);
     }
+    
+    // Thêm event listener để lắng nghe khi quay lại từ trang khác
+    const handleFocus = () => {
+      if (!id) {
+        fetchMovieList();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [id, navigate]);
   
   const fetchMovieList = async () => {
@@ -41,7 +166,7 @@ export default function ShowtimeManagement() {
       setError(null);
       
       console.log("Fetching movie list");
-      const result = await api.get("QuanLyPhim/LayDanhSachPhim?maNhom=GP01");
+      const result = await api.get(`QuanLyPhim/LayDanhSachPhim?maNhom=${DEFAULT_GROUP_CODE}`);
       
       console.log("Movie list response:", result);
       if (result.data && result.data.content) {
@@ -54,7 +179,7 @@ export default function ShowtimeManagement() {
     } catch (err) {
       console.error("Failed to fetch movie list:", err);
       setError(err.message || "Không thể tải danh sách phim");
-      message.error("Không thể tải danh sách phim: " + (err.response?.data?.content || err.message));
+      handleError(err, "tải danh sách phim");
     } finally {
       setLoading(false);
     }
@@ -87,7 +212,7 @@ export default function ShowtimeManagement() {
     } catch (err) {
       console.error("Failed to fetch movie info:", err);
       setError(err.message || "Không thể tải thông tin phim");
-      message.error("Không thể tải thông tin phim: " + (err.response?.data?.content || err.message));
+      handleError(err, "tải thông tin phim");
     } finally {
       setLoading(false);
     }
@@ -110,7 +235,7 @@ export default function ShowtimeManagement() {
     } catch (err) {
       console.error("Failed to fetch cinema systems:", err);
       setError(err.message || "Không thể tải danh sách hệ thống rạp");
-      message.error("Không thể tải danh sách hệ thống rạp: " + (err.response?.data?.content || err.message));
+      handleError(err, "tải danh sách hệ thống rạp");
     } finally {
       setLoading(false);
     }
@@ -125,7 +250,7 @@ export default function ShowtimeManagement() {
       setCinemaComplexes(result.data.content);
     } catch (err) {
       console.error("Failed to fetch cinema complexes:", err);
-      message.error("Không thể tải danh sách cụm rạp!");
+      handleError(err, "tải danh sách cụm rạp");
     } finally {
       setLoading(false);
     }
@@ -143,6 +268,13 @@ export default function ShowtimeManagement() {
       
       console.log("Form values:", values);
       console.log("Selected movie ID:", selectedMovieId);
+      
+      // Hiển thị loading message
+      message.loading({
+        content: `Đang tạo lịch chiếu cho phim "${movieInfo?.tenPhim || 'Phim'}"...`,
+        duration: 0,
+        key: 'createShowtime'
+      });
       
       // Kiểm tra có phim đã chọn chưa
       if (!selectedMovieId) {
@@ -172,11 +304,74 @@ export default function ShowtimeManagement() {
       
       await api.post("QuanLyDatVe/TaoLichChieu", showtime);
       
-      message.success("Tạo lịch chiếu thành công!");
-      navigate("/admin/films");
+      // Đóng loading message nếu có
+      message.destroy('createShowtime');
+      
+      // Thông báo thành công đẹp hơn
+      message.success({
+        content: `🎬 Lịch chiếu đã được tạo thành công!`,
+        duration: 4,
+        style: {
+          marginTop: '20vh',
+          fontSize: '16px',
+          fontWeight: 'bold',
+        },
+        icon: <span style={{ fontSize: '20px' }}>🎉</span>,
+      });
+      
+      // Hiển thị notification
+      notificationApi.success({
+        message: 'Tạo lịch chiếu thành công',
+        description: `Lịch chiếu cho phim "${movieInfo?.tenPhim || 'Phim'}" đã được tạo.`,
+        placement: 'topRight',
+        icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+        duration: 5
+      });
+      
+      // Hiển thị modal thông báo
+      setTimeout(() => {
+        Modal.success({
+          title: 'Tạo lịch chiếu thành công!',
+          content: (
+            <div>
+              <p>Lịch chiếu cho phim <strong>"{movieInfo?.tenPhim || 'Phim'}"</strong> đã được tạo thành công!</p>
+              <div className="mt-4 p-3 bg-gray-50 rounded">
+                <p><strong>Chi tiết lịch chiếu:</strong></p>
+                <ul className="list-disc list-inside mt-2">
+                  <li>Ngày chiếu: {moment(values.ngayChieuGioChieu).format('DD/MM/YYYY')}</li>
+                  <li>Giờ chiếu: {moment(values.ngayChieuGioChieu).format('HH:mm')}</li>
+                  <li>Giá vé: {values.giaVe?.toLocaleString('vi-VN')} VNĐ</li>
+                </ul>
+              </div>
+            </div>
+          ),
+        });
+      }, 300);
+      
+      // Hiển thị thông tin chi tiết về lịch chiếu đã tạo
+      console.log('🎬 Lịch chiếu đã được tạo thành công:', {
+        maPhim: selectedMovieId,
+        tenPhim: movieInfo?.tenPhim,
+        ngayChieuGioChieu: formattedDateTime,
+        maRap: values.maRap,
+        giaVe: values.giaVe
+      });
+      
+      // Reset form
+      form.resetFields();
+      
+      // Chuyển về trang quản lý phim sau 2 giây để người dùng thấy thông báo
+      setTimeout(() => {
+        navigate("/admin/films");
+      }, 2000);
     } catch (err) {
       console.error("Failed to create showtime:", err);
-      message.error("Không thể tạo lịch chiếu: " + (err.response?.data?.content || err.message));
+      
+      // Đóng loading message nếu có
+      message.destroy('createShowtime');
+      
+      // Sử dụng hàm xử lý lỗi chung
+      handleError(err, `tạo lịch chiếu cho phim "${movieInfo?.tenPhim || 'Phim'}"`);
     } finally {
       setLoading(false);
     }
@@ -189,51 +384,109 @@ export default function ShowtimeManagement() {
 
   return (
     <div className="container mx-auto py-8">
+      {contextHolder} {/* Thêm contextHolder để hiển thị notification */}
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold mb-6">Tạo lịch chiếu phim</h1>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Tạo lịch chiếu phim</h1>
+            <p className="text-gray-600 text-sm mt-1">
+              🎬 Tạo lịch chiếu mới cho phim trong hệ thống
+            </p>
+          </div>
+          <Button onClick={() => navigate("/admin/films")}>
+            Quay lại
+          </Button>
+        </div>
         
-        {loading && <div className="text-center py-4">Đang tải dữ liệu...</div>}
+        {loading && (
+          <div className="text-center py-8">
+            <Spin size="large" indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+            <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
+          </div>
+        )}
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <strong className="font-bold">Lỗi!</strong>
-            <span className="block"> {error}</span>
-          </div>
+          <Alert
+            message="Lỗi"
+            description={error}
+            type="error"
+            showIcon
+            icon={<ExclamationCircleOutlined />}
+            className="mb-6"
+            action={
+              <Button size="small" danger onClick={() => setError(null)}>
+                Đóng
+              </Button>
+            }
+          />
         )}
 
         {!id && !selectedMovieId && movies.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-3">Chọn phim để tạo lịch chiếu:</h2>
+          <Card className="mb-6" size="small">
+            <h2 className="text-lg font-semibold mb-3 flex items-center">
+              <InfoCircleOutlined className="mr-2 text-blue-500" />
+              Chọn phim để tạo lịch chiếu:
+            </h2>
             <Select 
-              placeholder="Chọn phim" 
+              placeholder="Chọn phim từ danh sách" 
               style={{ width: '100%' }}
               onChange={handleMovieSelect}
+              showSearch
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
             >
               {movies.map((movie) => (
                 <Option key={movie.maPhim} value={movie.maPhim}>
-                  {movie.tenPhim}
+                  <div className="flex items-center">
+                    <img 
+                      src={movie.hinhAnh} 
+                      alt={movie.tenPhim} 
+                      className="w-8 h-12 object-cover rounded mr-2"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://placehold.co/32x48?text=No+Img";
+                      }}
+                    />
+                    <span>{movie.tenPhim}</span>
+                  </div>
                 </Option>
               ))}
             </Select>
-          </div>
+          </Card>
         )}
         
         {movieInfo && (
-          <div className="flex mb-6">
-            <img 
-              src={movieInfo.hinhAnh} 
-              alt={movieInfo.tenPhim} 
-              className="w-24 h-36 object-cover rounded mr-4"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "https://placehold.co/96x144?text=No+Image";
-              }}
-            />
-            <div>
-              <h2 className="text-xl font-bold mb-2">{movieInfo.tenPhim}</h2>
-              <p className="text-gray-600">{movieInfo.moTa?.substring(0, 200)}...</p>
+          <Card className="mb-6" size="small">
+            <div className="flex items-start">
+              <img 
+                src={movieInfo.hinhAnh} 
+                alt={movieInfo.tenPhim} 
+                className="w-24 h-36 object-cover rounded mr-4"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://placehold.co/96x144?text=No+Image";
+                }}
+              />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold mb-2 text-blue-600">{movieInfo.tenPhim}</h2>
+                <p className="text-gray-600 mb-2">{movieInfo.moTa?.substring(0, 200)}...</p>
+                <Space size="small">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    {movieInfo.dangChieu ? 'Đang chiếu' : 'Sắp chiếu'}
+                  </span>
+                  {movieInfo.hot && (
+                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                      Hot
+                    </span>
+                  )}
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                    ⭐ {movieInfo.danhGia}/10
+                  </span>
+                </Space>
+              </div>
             </div>
-          </div>
+          </Card>
         )}
         
         {(movieInfo || selectedMovieId) && (

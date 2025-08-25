@@ -20,11 +20,11 @@ export default function ListMoviePage() {
     if (activeTab === "all") {
       setFilteredMovies(data);
     } else if (activeTab === "nowShowing") {
-      // Movies with dangChieu=true are currently showing
-      setFilteredMovies(data.filter(movie => movie.dangChieu === true));
+      // Chỉ hiển thị phim đang chiếu (ưu tiên dangChieu)
+      setFilteredMovies(data.filter(movie => movie.dangChieu === true && movie.sapChieu !== true));
     } else if (activeTab === "comingSoon") {
-      // Movies with sapChieu=true are coming soon
-      setFilteredMovies(data.filter(movie => movie.sapChieu === true));
+      // Chỉ hiển thị phim sắp chiếu (không phải đang chiếu)
+      setFilteredMovies(data.filter(movie => movie.sapChieu === true && movie.dangChieu !== true));
     }
   }, [activeTab, data]);
 

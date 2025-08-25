@@ -89,7 +89,8 @@ export default function TicketRoom() {
       // Refresh ticket room data after booking
       dispatch(getTicketRoomInfo(id));
     }).catch(err => {
-      message.error("Đặt vé thất bại: " + err.message);
+      const errorMessage = err.response?.data?.content || err.response?.data?.message || err.message || "Đặt vé thất bại";
+      message.error(errorMessage);
     });
   };
 

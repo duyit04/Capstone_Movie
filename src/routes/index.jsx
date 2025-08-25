@@ -1,6 +1,6 @@
 import HomeTemplate from "../pages/HomeTemplate";
 import HomePage from "../pages/HomeTemplate/HomePage";
-import AboutPage from "../pages/HomeTemplate/AboutPage";
+
 import ListMoviePage from "../pages/HomeTemplate/ListMoviePage";
 import NewsPage from "../pages/HomeTemplate/NewsPage";
 import LoginPage from "../pages/HomeTemplate/LoginPage";
@@ -30,16 +30,17 @@ const routes = [
         path: "",
         element: HomePage,
       },
-      {
-        path: "about",
-        element: AboutPage,
-      },
+
       {
         path: "list-movie",
         element: ListMoviePage,
       },
       {
         path: "cinemas",
+        element: CinemasPage,
+      },
+      {
+        path: "cinema/:id",
         element: CinemasPage,
       },
       {
@@ -60,6 +61,10 @@ const routes = [
       },
       {
         path: "dat-ve/:id",
+        element: TicketRoom,
+      },
+      {
+        path: "ticket-room/:id",
         element: TicketRoom,
       },
       {

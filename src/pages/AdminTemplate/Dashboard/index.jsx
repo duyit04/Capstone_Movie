@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import api from "../../../services/api";
 import "./styles.css";
+import { DEFAULT_GROUP_CODE } from "../../../config/constants";
 
 const { Title } = Typography;
 
@@ -24,7 +25,7 @@ export default function Dashboard() {
       try {
         console.log("Fetching dashboard data...");
         // Fetch movies data
-        const moviesResponse = await api.get("/QuanLyPhim/LayDanhSachPhim?maNhom=GP01");
+        const moviesResponse = await api.get(`/QuanLyPhim/LayDanhSachPhim?maNhom=${DEFAULT_GROUP_CODE}`);
         console.log("Movies response:", moviesResponse);
         
         if (!moviesResponse.data || !moviesResponse.data.content) {
@@ -52,7 +53,7 @@ export default function Dashboard() {
         setRecentMovies(sortedMovies);
         
         // Fetch users data
-        const usersResponse = await api.get("/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=GP01");
+        const usersResponse = await api.get(`/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${DEFAULT_GROUP_CODE}`);
         const users = usersResponse.data.content;
         
         setUserStats({
@@ -61,8 +62,8 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         // Hiển thị lỗi cho người dùng
-        const errorMessage = error.response?.data?.message || error.message || "Không thể tải dữ liệu";
-        message.error(`Lỗi: ${errorMessage}`);
+        const errorMessage = error.response?.data?.content || error.response?.data?.message || error.message || "Không thể tải dữ liệu";
+        message.error(errorMessage);
         
         // Set default data to prevent errors
         setMovieStats({ total: 0, nowShowing: 0, comingSoon: 0 });

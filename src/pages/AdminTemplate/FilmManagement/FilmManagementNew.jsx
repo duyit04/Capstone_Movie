@@ -26,7 +26,8 @@ const FilmManagementNew = () => {
       const response = await api.get("/QuanLyPhim/LayDanhSachPhim");
       setFilms(response.data.content || []);
     } catch (error) {
-      message.error("Không thể tải danh sách phim");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể tải danh sách phim";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,8 @@ const FilmManagementNew = () => {
       message.success("Xóa phim thành công");
       fetchFilms();
     } catch (error) {
-      message.error("Không thể xóa phim");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể xóa phim";
+      message.error(errorMessage);
     }
   };
 

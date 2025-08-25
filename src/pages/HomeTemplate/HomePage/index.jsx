@@ -31,17 +31,44 @@ export default function HomePage() {
     dispatch(fetchCinemaSchedules());
   }, [dispatch]);
 
+  // Debug effect để kiểm tra dữ liệu phim
+  useEffect(() => {
+    if (movies && movies.length > 0) {
+      console.log('=== DEBUG: Kiểm tra dữ liệu phim ===');
+      movies.forEach((movie, index) => {
+        if (movie.dangChieu === true && movie.sapChieu === true) {
+          console.warn(`⚠️ Phim ${index + 1}: "${movie.tenPhim}" vẫn có cả 2 trạng thái!`);
+          console.log('  - dangChieu:', movie.dangChieu);
+          console.log('  - sapChieu:', movie.sapChieu);
+        }
+      });
+      console.log('=== Kết thúc debug ===');
+    }
+  }, [movies]);
+
   // Filter movies based on active tab
   const filteredMovies = movies?.filter((movie) => {
-    // First filter by tab
+    // Đảm bảo mỗi phim chỉ có 1 trạng thái duy nhất trước khi filter
+    const processedMovie = { ...movie };
+    if (processedMovie.dangChieu === true && processedMovie.sapChieu === true) {
+      processedMovie.sapChieu = false; // Ưu tiên "đang chiếu"
+    }
+    
+    // First filter by tab - đảm bảo mỗi phim chỉ xuất hiện ở 1 tab duy nhất
     let matchesTab = true;
-    if (activeTab === "nowShowing") matchesTab = movie.dangChieu;
-    else if (activeTab === "comingSoon") matchesTab = movie.sapChieu;
+    if (activeTab === "nowShowing") {
+      // Chỉ hiển thị phim đang chiếu (ưu tiên dangChieu)
+      matchesTab = processedMovie.dangChieu === true && processedMovie.sapChieu !== true;
+    } else if (activeTab === "comingSoon") {
+      // Chỉ hiển thị phim sắp chiếu (không phải đang chiếu)
+      matchesTab = processedMovie.sapChieu === true && processedMovie.dangChieu !== true;
+    }
+    // Tab "all" hiển thị tất cả phim
     
     // Then filter by search keyword
     let matchesSearch = true;
     if (searchKeyword.trim()) {
-      matchesSearch = movie.tenPhim.toLowerCase().includes(searchKeyword.toLowerCase());
+      matchesSearch = processedMovie.tenPhim.toLowerCase().includes(searchKeyword.toLowerCase());
     }
     
     return matchesTab && matchesSearch;
@@ -127,7 +154,20 @@ export default function HomePage() {
                   <div className="banner-inner">
                     <div className="banner-badges">
                       {banner.maPhim ? (
-                        <span className="badge badge-primary">Đang chiếu</span>
+                        <span className="badge badge-primary">
+                          {(() => {
+                            // Tìm phim tương ứng để hiển thị trạng thái chính xác
+                            const movie = movies?.find(m => m.maPhim === banner.maPhim);
+                            if (movie) {
+                              if (movie.dangChieu === true && movie.sapChieu !== true) {
+                                return 'Đang chiếu';
+                              } else if (movie.sapChieu === true && movie.dangChieu !== true) {
+                                return 'Sắp chiếu';
+                              }
+                            }
+                            return 'Phim';
+                          })()}
+                        </span>
                       ) : (
                         <span className="badge badge-secondary">Sự kiện</span>
                       )}
@@ -303,7 +343,16 @@ export default function HomePage() {
                     <span>{Number.isFinite(Number(movie.danhGia)) ? `${Number(movie.danhGia)}/10` : 'N/A'}</span>
                   </div>
                   <div className="gc-ribbon">
-                    {movie.dangChieu ? 'Đang chiếu' : movie.sapChieu ? 'Sắp chiếu' : 'Phim'}
+                    {(() => {
+                      // Đảm bảo mỗi phim chỉ có 1 trạng thái duy nhất
+                      if (movie.dangChieu === true && movie.sapChieu !== true) {
+                        return 'Đang chiếu';
+                      } else if (movie.sapChieu === true && movie.dangChieu !== true) {
+                        return 'Sắp chiếu';
+                      } else {
+                        return 'Phim';
+                      }
+                    })()}
                   </div>
                   <div className="gc-overlay">
                     <div className="gc-actions">

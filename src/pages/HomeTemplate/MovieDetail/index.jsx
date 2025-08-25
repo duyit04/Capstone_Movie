@@ -23,7 +23,25 @@ export default function MovieDetail() {
       try {
         setLoading(true);
         const result = await api.get(`QuanLyPhim/LayThongTinPhim?MaPhim=${id}`);
-        setMovie(result.data.content);
+        
+        // Xử lý dữ liệu phim để đảm bảo chỉ có 1 trạng thái duy nhất
+        const movieData = { ...result.data.content }; // Tạo bản sao mới
+        
+        // Logic xử lý trạng thái: ưu tiên "đang chiếu" nếu có cả 2
+        if (movieData.dangChieu === true && movieData.sapChieu === true) {
+          movieData.sapChieu = false;
+          console.log(`Phim "${movieData.tenPhim}" có cả 2 trạng thái, đã loại bỏ "sắp chiếu"`);
+        }
+        
+        // Đảm bảo chỉ có 1 trạng thái duy nhất
+        if (movieData.dangChieu === true) {
+          movieData.sapChieu = false;
+        } else if (movieData.sapChieu === true) {
+          movieData.dangChieu = false;
+        }
+        
+        console.log('Đã xử lý phim để đảm bảo trạng thái duy nhất:', movieData.tenPhim);
+        setMovie(movieData);
 
         const showtimes = await api.get(`QuanLyRap/LayThongTinLichChieuPhim?MaPhim=${id}`);
         setShowtimes(showtimes.data.content);
@@ -35,7 +53,8 @@ export default function MovieDetail() {
 
       } catch (error) {
         console.error("Lỗi khi tải thông tin phim:", error);
-        message.error("Không thể tải thông tin phim. Vui lòng thử lại sau.");
+        const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể tải thông tin phim. Vui lòng thử lại sau.";
+        message.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -178,8 +197,16 @@ export default function MovieDetail() {
                 <Row gutter={[16, 16]}>
                   <Col span={24}>
                     <Tag color="red">{movie.hot ? 'HOT' : 'NEW'}</Tag>
-                    {movie.dangChieu && <Tag color="green">Đang chiếu</Tag>}
-                    {movie.sapChieu && <Tag color="blue">Sắp chiếu</Tag>}
+                    {(() => {
+                      // Đảm bảo mỗi phim chỉ có 1 trạng thái duy nhất
+                      if (movie.dangChieu === true && movie.sapChieu !== true) {
+                        return <Tag color="green">Đang chiếu</Tag>;
+                      } else if (movie.sapChieu === true && movie.dangChieu !== true) {
+                        return <Tag color="blue">Sắp chiếu</Tag>;
+                      } else {
+                        return <Tag color="default">Phim</Tag>;
+                      }
+                    })()}
                   </Col>
                   
                   <Col span={24}>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import api from "../../../services/api";
 import "./enhanced-table.css";
+import { DEFAULT_GROUP_CODE } from "../../../config/constants";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -37,15 +38,16 @@ export default function AddUserPageNew() {
     try {
       setLoading(true);
       const url = keyword
-        ? `/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=GP01&tuKhoa=${keyword}`
-        : "/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=GP01";
+        ? `/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${DEFAULT_GROUP_CODE}&tuKhoa=${keyword}`
+        : `/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${DEFAULT_GROUP_CODE}`;
       const response = await api.get(url);
       let list = response.data.content;
       if (role) list = list.filter(u => u.maLoaiNguoiDung === role);
       setUsers(list);
     } catch (error) {
       console.error("Lỗi khi tải danh sách người dùng:", error);
-      message.error("Không thể tải danh sách người dùng");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể tải danh sách người dùng";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,8 @@ export default function AddUserPageNew() {
       fetchUsers(searchText);
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);
-      message.error("Không thể xóa người dùng");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể xóa người dùng";
+      message.error(errorMessage);
     }
   };
 
@@ -118,7 +121,7 @@ export default function AddUserPageNew() {
       const values = await form.validateFields();
       if (editingUser) {
         // Nếu không nhập mật khẩu mới thì bỏ field này đi
-        const payload = { ...values, maNhom: "GP01" };
+        const payload = { ...values, maNhom: DEFAULT_GROUP_CODE };
         if (!payload.matKhau) delete payload.matKhau;
         await api.put("/QuanLyNguoiDung/CapNhatThongTinNguoiDung", payload);
         message.success("Cập nhật người dùng thành công");
@@ -126,7 +129,7 @@ export default function AddUserPageNew() {
         // Thêm mới
         await api.post("/QuanLyNguoiDung/ThemNguoiDung", {
           ...values,
-          maNhom: "GP01",
+          maNhom: DEFAULT_GROUP_CODE,
         });
         message.success("Thêm người dùng thành công");
       }
@@ -134,7 +137,8 @@ export default function AddUserPageNew() {
       fetchUsers(searchText);
     } catch (error) {
       console.error("Lỗi khi lưu thông tin người dùng:", error);
-      message.error("Không thể lưu thông tin người dùng");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể lưu thông tin người dùng";
+      message.error(errorMessage);
     }
   };
 

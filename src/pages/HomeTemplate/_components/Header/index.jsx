@@ -119,7 +119,7 @@ export default function Header() {
             disabledOverflow
             items={[
               { key: "/", label: <NavLink to="/" style={{ color: "#fff" }}>Trang chủ</NavLink> },
-              { key: "/about", label: <NavLink to="/about" style={{ color: "#fff" }}>Giới thiệu</NavLink> },
+
               { key: "/list-movie", label: <NavLink to="/list-movie" style={{ color: "#fff" }}>Phim</NavLink> },
               { key: "/cinemas", label: <NavLink to="/cinemas" style={{ color: "#fff" }}>Rạp</NavLink> },
               { key: "/news", label: <NavLink to="/news" style={{ color: "#fff" }}>Tin tức</NavLink> },
@@ -150,7 +150,7 @@ export default function Header() {
                 { key: "/list-movie", label: <Link to="/list-movie" onClick={() => setMobileMenuOpen(false)}>Phim</Link> },
                 { key: "/cinemas", label: <Link to="/cinemas" onClick={() => setMobileMenuOpen(false)}>Rạp</Link> },
                 { key: "/news", label: <Link to="/news" onClick={() => setMobileMenuOpen(false)}>Tin tức</Link> },
-                { key: "/about", label: <Link to="/about" onClick={() => setMobileMenuOpen(false)}>Giới thiệu</Link> },
+
                 ...(!user ? [
                   { key: "/login", label: <Link to="/login" onClick={() => setMobileMenuOpen(false)}><LoginOutlined /> Đăng nhập</Link> },
                   { key: "/register", label: <Link to="/register" onClick={() => setMobileMenuOpen(false)}><UserAddOutlined /> Đăng ký</Link> },

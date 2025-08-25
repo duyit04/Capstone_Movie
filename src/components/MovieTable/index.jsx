@@ -95,7 +95,8 @@ export default function MovieTable() {
       setMovies(mockMovies);
       setPagination(prev => ({ ...prev, total: mockMovies.length }));
     } catch (error) {
-      message.error("Không thể tải danh sách phim!");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể tải danh sách phim!";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -127,7 +128,8 @@ export default function MovieTable() {
       setPagination(prev => ({ ...prev, total: updatedMovies.length }));
       message.success("Xóa phim thành công!");
     } catch (error) {
-      message.error("Không thể xóa phim!");
+      const errorMessage = error.response?.data?.content || error.response?.data?.message || "Không thể xóa phim!";
+      message.error(errorMessage);
     }
   };
 
