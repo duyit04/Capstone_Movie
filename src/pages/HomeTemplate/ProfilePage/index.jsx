@@ -111,8 +111,11 @@ export default function ProfilePage() {
   };
   
   const handleLogout = () => {
+    // Xóa tất cả thông tin xác thực
     localStorage.removeItem("ACCESS_TOKEN");
     localStorage.removeItem("USER_INFO");
+    localStorage.removeItem("USER_LOGIN");
+    localStorage.removeItem("USER_LOGIN_TOKEN");
     navigate("/login", { replace: true });
   };
 

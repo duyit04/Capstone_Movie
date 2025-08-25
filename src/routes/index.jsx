@@ -8,6 +8,7 @@ import RegisterPage from "../pages/HomeTemplate/RegisterPage";
 import MovieDetail from "../pages/HomeTemplate/MovieDetail";
 import TicketRoom from "../pages/HomeTemplate/TicketRoom";
 import ProfilePage from "../pages/HomeTemplate/ProfilePage";
+import CinemasPage from "../pages/HomeTemplate/CinemasPage";
 
 import AdminTemplate from "../pages/AdminTemplate";
 import Dashboard from "../pages/AdminTemplate/Dashboard";
@@ -36,6 +37,10 @@ const routes = [
       {
         path: "list-movie",
         element: ListMoviePage,
+      },
+      {
+        path: "cinemas",
+        element: CinemasPage,
       },
       {
         path: "news",

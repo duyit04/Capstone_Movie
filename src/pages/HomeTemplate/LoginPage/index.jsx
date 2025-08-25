@@ -4,6 +4,7 @@ import { Form, Input, Button, Card, Typography, message, Space, Divider, Row, Co
 import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import api from "../../../services/api";
 import BearAvatar from "./BearAvatar";
+import { saveUserAuth } from "../../../lib/auth";
 
 const { Title, Text } = Typography;
 
@@ -28,11 +29,7 @@ export default function LoginPage() {
       const userInfo = result.data.content;
       
       // Lưu thông tin người dùng và token vào localStorage
-      localStorage.setItem("USER_INFO", JSON.stringify(userInfo));
-      localStorage.setItem("ACCESS_TOKEN", userInfo.accessToken);
-      
-      // Thông báo cho header biết về thay đổi đăng nhập
-      window.dispatchEvent(new Event('userLoginChange'));
+      saveUserAuth(userInfo);
       
       // Thông báo đăng nhập thành công với toast notification đẹp mắt
       if (userInfo.maLoaiNguoiDung === "QuanTri") {

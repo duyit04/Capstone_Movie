@@ -19,6 +19,7 @@ import LoginModal from "../LoginModal";
 import RegisterModal from "../RegisterModal";
 import movieLogo from "../../assets/movie.png";
 import "./styles.css";
+import { getUserInfo, clearUserAuth } from "../../lib/auth";
 
 // Search component đã được thay thế bằng Input component
 
@@ -34,19 +35,6 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
 
   // Lấy thông tin người dùng từ localStorage
-  const getUserInfo = () => {
-    const userInfo = localStorage.getItem("USER_INFO") || localStorage.getItem("USER_LOGIN");
-    if (userInfo) {
-      try {
-        return JSON.parse(userInfo);
-      } catch (error) {
-        console.error("Error parsing user info:", error);
-        return null;
-      }
-    }
-    return null;
-  };
-
   const userInfo = getUserInfo();
 
   useEffect(() => {
@@ -75,13 +63,7 @@ export default function Header() {
 
   const handleLogout = () => {
     // Xóa tất cả thông tin xác thực
-    localStorage.removeItem("USER_INFO");
-    localStorage.removeItem("ACCESS_TOKEN");
-    localStorage.removeItem("USER_LOGIN");
-    localStorage.removeItem("USER_LOGIN_TOKEN");
-    
-    // Dispatch event để thông báo đăng xuất
-    window.dispatchEvent(new Event("authChange"));
+    clearUserAuth();
     
     message.success("Đăng xuất thành công!");
     navigate("/");

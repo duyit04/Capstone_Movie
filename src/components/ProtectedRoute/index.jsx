@@ -1,15 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { isAuthenticated, isAdmin } from "../lib/auth";
 
 export const AdminProtectedRoute = () => {
-  // Kiểm tra xác thực từ cả hai nguồn có thể có
-  const userInfo = JSON.parse(localStorage.getItem("USER_INFO") || localStorage.getItem("USER_LOGIN") || "{}");
-  const accessToken = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("USER_LOGIN_TOKEN");
-  
-  const isAuthenticated = userInfo && accessToken;
-  const isAdmin = userInfo && userInfo.maLoaiNguoiDung === "QuanTri";
-
-  // Nếu chưa đăng nhập hoặc không phải admin, chuyển hướng đến trang đăng nhập admin
-  if (!isAuthenticated || !isAdmin) {
+  // Kiểm tra xác thực và quyền admin
+  if (!isAuthenticated() || !isAdmin()) {
     return <Navigate to="/admin/login" replace />;
   }
 
@@ -18,14 +12,8 @@ export const AdminProtectedRoute = () => {
 };
 
 export const UserProtectedRoute = () => {
-  // Kiểm tra xác thực từ cả hai nguồn có thể có
-  const userInfo = JSON.parse(localStorage.getItem("USER_INFO") || localStorage.getItem("USER_LOGIN") || "{}");
-  const accessToken = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("USER_LOGIN_TOKEN");
-  
-  const isAuthenticated = userInfo && accessToken;
-
-  // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-  if (!isAuthenticated) {
+  // Kiểm tra xác thực
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 

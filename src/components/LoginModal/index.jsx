@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import BearAvatar from '../../pages/HomeTemplate/LoginPage/BearAvatar';
 import api from '../../services/api';
 import { useNavigate, Link } from 'react-router-dom';
+import { saveUserAuth } from '../../lib/auth';
 
 /**
  * Modal đăng nhập (popup) dùng trong Header
@@ -33,11 +34,7 @@ export default function LoginModal({ open, onOpenChange, onSwitchRegister }) {
       const userInfo = result.data.content;
       
       // Lưu thông tin người dùng vào localStorage
-      localStorage.setItem('USER_LOGIN', JSON.stringify(userInfo));
-      localStorage.setItem('USER_LOGIN_TOKEN', userInfo.accessToken);
-      
-      // Dispatch custom event để thông báo đăng nhập thành công
-      window.dispatchEvent(new CustomEvent("authChange", { detail: { type: 'login' } }));
+      saveUserAuth(userInfo);
       
       // Thông báo đăng nhập thành công với thông tin chi tiết
       if (userInfo.maLoaiNguoiDung === 'QuanTri') {

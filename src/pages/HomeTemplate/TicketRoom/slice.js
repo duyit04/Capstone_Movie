@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../services/api";
+import { getAccessToken } from "../../../lib/auth";
 
 // Thunk để lấy thông tin phòng vé
 export const getTicketRoomInfo = createAsyncThunk(
@@ -20,7 +21,7 @@ export const bookTickets = createAsyncThunk(
   async (bookingData, { rejectWithValue, getState }) => {
     try {
       // Lấy accessToken từ localStorage
-      const token = localStorage.getItem("USER_LOGIN_TOKEN");
+      const token = getAccessToken();
       
       if (!token) {
         return rejectWithValue("User not logged in");

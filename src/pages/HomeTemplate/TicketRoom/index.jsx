@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { bookTickets, getTicketRoomInfo } from "./slice";
 import { Row, Col, Button, Typography, Divider, message, Tag, Modal, Spin, Tooltip } from 'antd';
 import './styles.css';
+import { isAuthenticated } from '../../../lib/auth';
 
 const { Title, Text } = Typography;
 
@@ -68,8 +69,7 @@ export default function TicketRoom() {
     }
 
     // Kiểm tra đăng nhập
-    const userInfo = localStorage.getItem("USER_LOGIN");
-    if (!userInfo) {
+    if (!isAuthenticated()) {
       message.warning("Vui lòng đăng nhập để đặt vé");
       navigate("/login");
       return;

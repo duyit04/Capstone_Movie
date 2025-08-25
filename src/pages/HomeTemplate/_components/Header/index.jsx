@@ -9,6 +9,7 @@ import {
   UserAddOutlined,
 } from "@ant-design/icons";
 import logo from "../../../../assets/movie.png";
+import { getUserInfo, clearUserAuth } from "../../../../lib/auth";
 
 const { Header: AntHeader } = Layout;
 
@@ -21,12 +22,8 @@ export default function Header() {
   useEffect(() => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
     const checkUserLogin = () => {
-      const userInfo = localStorage.getItem("USER_INFO");
-      if (userInfo) {
-        setUser(JSON.parse(userInfo));
-      } else {
-        setUser(null);
-      }
+      const userInfo = getUserInfo();
+      setUser(userInfo);
     };
 
     // Kiểm tra lần đầu
@@ -64,12 +61,9 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("USER_INFO");
-    localStorage.removeItem("ACCESS_TOKEN");
+    // Xóa tất cả thông tin xác thực
+    clearUserAuth();
     setUser(null);
-    
-    // Thông báo cho các component khác biết về thay đổi đăng xuất
-    window.dispatchEvent(new Event('userLoginChange'));
     
     navigate("/login");
   };
@@ -127,6 +121,7 @@ export default function Header() {
               { key: "/", label: <NavLink to="/" style={{ color: "#fff" }}>Trang chủ</NavLink> },
               { key: "/about", label: <NavLink to="/about" style={{ color: "#fff" }}>Giới thiệu</NavLink> },
               { key: "/list-movie", label: <NavLink to="/list-movie" style={{ color: "#fff" }}>Phim</NavLink> },
+              { key: "/cinemas", label: <NavLink to="/cinemas" style={{ color: "#fff" }}>Rạp</NavLink> },
               { key: "/news", label: <NavLink to="/news" style={{ color: "#fff" }}>Tin tức</NavLink> },
             ]}
           />
@@ -153,6 +148,7 @@ export default function Header() {
               items={[
                 { key: "/", label: <Link to="/" onClick={() => setMobileMenuOpen(false)}>Trang chủ</Link> },
                 { key: "/list-movie", label: <Link to="/list-movie" onClick={() => setMobileMenuOpen(false)}>Phim</Link> },
+                { key: "/cinemas", label: <Link to="/cinemas" onClick={() => setMobileMenuOpen(false)}>Rạp</Link> },
                 { key: "/news", label: <Link to="/news" onClick={() => setMobileMenuOpen(false)}>Tin tức</Link> },
                 { key: "/about", label: <Link to="/about" onClick={() => setMobileMenuOpen(false)}>Giới thiệu</Link> },
                 ...(!user ? [
