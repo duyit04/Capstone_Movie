@@ -19,7 +19,8 @@ import {
   Avatar,
   Tooltip,
   Badge,
-  Rate
+  Rate,
+  message
 } from 'antd';
 import { 
   ClockCircleOutlined, 
@@ -34,7 +35,8 @@ import {
   SettingOutlined,
   ThunderboltOutlined,
   HeartOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -350,6 +352,7 @@ export default function CinemasPage() {
   const { theme } = useTheme();
   const { cinemas, cinemaSchedules } = useSelector(state => state.homeSlice);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const [expandedCinemas, setExpandedCinemas] = useState(new Set()); // Quản lý rạp nào đang mở rộng
   const { id: cinemaId } = useParams(); // Lấy ID của rạp từ URL
 
   // Tối ưu useEffect để tránh re-render không cần thiết
@@ -366,6 +369,19 @@ export default function CinemasPage() {
 
   const systems = cinemas.data || [];
   const scheduleData = cinemaSchedules.data || [];
+  
+  // Debug log để kiểm tra dữ liệu
+  console.log('🎬 Systems data:', systems);
+  console.log('🎬 Schedule data:', scheduleData);
+  
+  // Kiểm tra và log số lượng rạp cho mỗi hệ thống
+  if (systems.length > 0 && scheduleData.length > 0) {
+    systems.forEach(sys => {
+      const systemSchedule = scheduleData.find(s => s.maHeThongRap === sys.maHeThongRap);
+      const numberOfCinemas = systemSchedule?.lstCumRap?.length || 0;
+      console.log(`🏢 ${sys.tenHeThongRap}: ${numberOfCinemas} rạp`);
+    });
+  }
 
   // Tìm rạp cụ thể nếu có cinemaId
   const specificCinema = useMemo(() => {
@@ -398,25 +414,31 @@ export default function CinemasPage() {
   }, [cinemaId, scheduleData, systems]);
 
   // Memoize systemTabs để tránh re-render
-  const systemTabs = useMemo(() => systems.map(sys => ({
-    key: sys.maHeThongRap,
-    label: (
-      <div className="flex items-center gap-3 p-2 hover:scale-105 transition-transform duration-200">
-        <img 
-          src={sys.logo} 
-          alt={sys.tenHeThongRap} 
-          className="w-10 h-10 object-contain rounded-lg bg-white p-1 shadow-sm" 
-          loading="lazy"
-        />
-        <div className="text-left">
-          <div className="font-semibold text-sm">{sys.tenHeThongRap}</div>
-          <div className="text-xs text-gray-500">
-            {sys.lstCumRap?.length || 0} rạp
+  const systemTabs = useMemo(() => systems.map(sys => {
+    // Tìm số lượng rạp từ cinemaSchedules thay vì từ systems
+    const systemSchedule = scheduleData.find(s => s.maHeThongRap === sys.maHeThongRap);
+    const numberOfCinemas = systemSchedule?.lstCumRap?.length || 0;
+    
+    return {
+      key: sys.maHeThongRap,
+      label: (
+        <div className="flex items-center gap-3 p-2 hover:scale-105 transition-transform duration-200">
+          <img 
+            src={sys.logo} 
+            alt={sys.tenHeThongRap} 
+            className="w-10 h-10 object-contain rounded-lg bg-white p-1 shadow-sm" 
+            loading="lazy"
+          />
+          <div className="text-left">
+            <div className="font-semibold text-sm">{sys.tenHeThongRap}</div>
+            <div className="text-xs text-gray-500">
+              {numberOfCinemas} rạp
+            </div>
           </div>
         </div>
-      </div>
-    ),
-  })), [systems]);
+      ),
+    };
+  }), [systems, scheduleData]);
 
   const [activeSystem, setActiveSystem] = useState(systemTabs[0]?.key);
   
@@ -538,6 +560,46 @@ export default function CinemasPage() {
         <Paragraph className={`text-lg ${theme==='dark' ? 'text-slate-300' : 'text-gray-600'}`}>
           Khám phá các rạp chiếu phim hiện đại với công nghệ tiên tiến và dịch vụ chất lượng cao
         </Paragraph>
+        
+                 {/* Nút điều khiển */}
+         <div className="mt-4">
+           <Button 
+             type="primary" 
+             icon={<ReloadOutlined />}
+             onClick={() => {
+               console.log('🔄 Manual refresh dữ liệu rạp chiếu phim...');
+               dispatch(fetchCinemas());
+               dispatch(fetchCinemaSchedules());
+               message.success('Đang làm mới dữ liệu rạp chiếu phim...');
+             }}
+             loading={cinemas.loading || cinemaSchedules.loading}
+             className="mx-2"
+           >
+             Làm mới dữ liệu
+           </Button>
+           
+           <Button 
+             type="default"
+             icon={<PlayCircleOutlined />}
+             onClick={() => {
+               if (expandedCinemas.size > 0) {
+                 // Thu gọn tất cả
+                 setExpandedCinemas(new Set());
+                 message.success('Đã thu gọn tất cả danh sách phim');
+               } else {
+                 // Mở rộng tất cả
+                 const allCinemaIds = activeSystemSchedules?.lstCumRap?.map(cum => cum.maCumRap) || [];
+                 setExpandedCinemas(new Set(allCinemaIds));
+                 message.success('Đã mở rộng tất cả danh sách phim');
+               }
+             }}
+             className="mx-2"
+           >
+             {expandedCinemas.size > 0 ? 'Thu gọn tất cả' : 'Mở rộng tất cả'}
+           </Button>
+           
+           
+         </div>
       </div>
 
       {/* Tabs đơn giản hóa */}
@@ -568,7 +630,22 @@ export default function CinemasPage() {
       {/* Empty state */}
       {!activeSystemSchedules && !cinemas.loading && !cinemaSchedules.loading && (
         <div>
-          <Empty description="Không có dữ liệu lịch chiếu" />
+          <Empty 
+            description={
+              <div>
+                <div className="text-lg font-medium mb-2">Không có dữ liệu lịch chiếu</div>
+                <div className="text-sm text-gray-500">
+                  Có thể do:
+                  <ul className="list-disc list-inside mt-2 text-left">
+                    <li>Chưa có lịch chiếu cho hệ thống rạp này</li>
+                    <li>API chưa trả về dữ liệu</li>
+                    <li>Vui lòng thử refresh trang</li>
+                  </ul>
+                </div>
+              </div>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
         </div>
       )}
 
@@ -593,7 +670,7 @@ export default function CinemasPage() {
                     </Title>
                     <div className="flex items-center gap-4 text-sm">
                       <Tag color="blue" icon={<HomeOutlined />}>
-                        {activeSystemInfo.lstCumRap?.length || 0} rạp
+                        {activeSystemSchedules?.lstCumRap?.length || 0} rạp
                       </Tag>
                       <Tag color="green" icon={<StarOutlined />}>
                         Hệ thống uy tín
@@ -606,7 +683,7 @@ export default function CinemasPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      {activeSystemInfo.lstCumRap?.length || 0}
+                      {activeSystemSchedules?.lstCumRap?.length || 0}
                     </div>
                     <div className="text-sm text-gray-600">Rạp chiếu</div>
                   </div>
@@ -656,86 +733,243 @@ export default function CinemasPage() {
                 className={`${theme==='dark' ? 'bg-slate-800/70 border-slate-700' : 'bg-white border-gray-200'} shadow-lg transition-all duration-200 hover:shadow-xl`}
                 bodyStyle={{ padding: '0' }}
               >
-                {/* Header của rạp */}
-                <div className={`p-6 ${theme==='dark' ? 'bg-slate-700' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
-                  <Row gutter={[16, 16]} align="middle">
-                    <Col xs={24} md={16}>
-                      <Title level={4} className={`mb-2 ${theme==='dark' ? 'text-slate-100' : 'text-gray-900'}`}>
-                        {cum.tenCumRap}
-                      </Title>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <Tag color="blue" icon={<HomeOutlined />}>
-                          {cum.diaChi}
-                        </Tag>
-                        <Tag color="green" icon={<PhoneOutlined />}>
-                          Liên hệ: 1900 xxxx
-                        </Tag>
-                        <Tag color="orange" icon={<SettingOutlined />}>
-                          Có chỗ đậu xe
-                        </Tag>
-                        <Tag color="purple" icon={<ThunderboltOutlined />}>
-                          WiFi miễn phí
-                        </Tag>
-                        <Tag color="cyan" icon={<HeartOutlined />}>
-                          Quán cà phê
-                        </Tag>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
-                          <ClockCircleOutlined />
-                          Mở cửa: 8:00 - 23:00
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <StarOutlined />
-                          Đánh giá: 4.5/5
-                        </span>
-                      </div>
-                    </Col>
-                    <Col xs={24} md={8} className="text-right">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-blue-600">
-                          {cum.danhSachPhim?.length || 0}
-                        </div>
-                        <div className="text-sm text-gray-600">Phim đang chiếu</div>
-                        <Button 
-                          type="primary" 
-                          size="large" 
-                          className="mt-3 hover:scale-105 transition-transform duration-200"
-                          onClick={() => navigate(`/cinema/${cum.maCumRap}`)}
-                        >
-                          Xem chi tiết
-                        </Button>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
+                                 {/* Header của rạp */}
+                 <div className={`p-6 ${theme==='dark' ? 'bg-slate-700' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+                   <Row gutter={[16, 16]} align="middle">
+                     <Col xs={24} md={16}>
+                       <Title level={4} className={`mb-2 ${theme==='dark' ? 'text-slate-100' : 'text-gray-900'}`}>
+                         {cum.tenCumRap}
+                       </Title>
+                       <div className="flex flex-wrap gap-2 mb-3">
+                         <Tag color="blue" icon={<HomeOutlined />}>
+                           {cum.diaChi}
+                         </Tag>
+                         <Tag color="green" icon={<PhoneOutlined />}>
+                           Liên hệ: 1900 xxxx
+                         </Tag>
+                         <Tag color="orange" icon={<SettingOutlined />}>
+                           Có chỗ đậu xe
+                         </Tag>
+                         <Tag color="purple" icon={<ThunderboltOutlined />}>
+                           WiFi miễn phí
+                         </Tag>
+                         <Tag color="cyan" icon={<HeartOutlined />}>
+                           Quán cà phê
+                         </Tag>
+                       </div>
+                       <div className="flex items-center gap-4 text-sm">
+                         <span className="flex items-center gap-1">
+                           <ClockCircleOutlined />
+                           Mở cửa: 8:00 - 23:00
+                         </span>
+                         <span className="flex items-center gap-1">
+                           <StarOutlined />
+                           Đánh giá: 4.5/5
+                         </span>
+                       </div>
+                     </Col>
+                     <Col xs={24} md={8} className="text-right">
+                       <div className="text-center">
+                         <div className="text-3xl font-bold text-blue-600">
+                           {cum.danhSachPhim?.length || 0}
+                         </div>
+                         <div className="text-sm text-gray-600">Phim đang chiếu</div>
+                         <div className="flex gap-2 mt-3 justify-center">
+                           <Button 
+                             type="primary" 
+                             size="small"
+                             onClick={() => navigate(`/cinema/${cum.maCumRap}`)}
+                           >
+                             Xem chi tiết
+                           </Button>
+                           <Button 
+                             type="default" 
+                             size="small"
+                             icon={expandedCinemas.has(cum.maCumRap) ? <PlayCircleOutlined /> : <PlayCircleOutlined />}
+                             onClick={() => {
+                               if (expandedCinemas.has(cum.maCumRap)) {
+                                 // Thu gọn
+                                 setExpandedCinemas(prev => {
+                                   const newSet = new Set(prev);
+                                   newSet.delete(cum.maCumRap);
+                                   return newSet;
+                                 });
+                               } else {
+                                 // Mở rộng
+                                 setExpandedCinemas(prev => new Set([...prev, cum.maCumRap]));
+                               }
+                             }}
+                           >
+                             {cum.danhSachPhim?.length > 0 
+                               ? (expandedCinemas.has(cum.maCumRap) ? 'Thu gọn phim' : 'Xem phim') 
+                               : 'Không có phim'
+                             }
+                           </Button>
+                         </div>
+                       </div>
+                     </Col>
+                   </Row>
+                 </div>
 
-                {/* Danh sách phim với lazy loading */}
-                <div className="p-6">
-                  {cum.danhSachPhim?.length ? (
-                    <div className="space-y-6">
-                      <Suspense fallback={<Skeleton active paragraph={{ rows: 2 }} />}>
-                        {cum.danhSachPhim.map((phim, phimIndex) => (
-                          <MovieItem
-                            key={phim.maPhim}
-                            phim={phim}
-                            phimIndex={phimIndex}
-                            theme={theme}
-                            handleBooking={handleBooking}
-                            navigate={navigate}
-                            formatTime={formatTime}
-                            formatDate={formatDate}
-                          />
-                        ))}
-                      </Suspense>
-                    </div>
-                  ) : (
-                    <Empty 
-                      description="Không có phim nào đang chiếu tại rạp này" 
-                      image={Empty.PRESENTED_IMAGE_SIMPLE} 
-                    />
-                  )}
-                </div>
+                                 {/* Danh sách phim với Collapse để thu gọn */}
+                 <div className="p-6">
+                   {cum.danhSachPhim?.length ? (
+                     <Collapse 
+                       activeKey={expandedCinemas.has(cum.maCumRap) ? ['movies'] : []}
+                       ghost
+                       className="bg-transparent"
+                       onChange={(keys) => {
+                         if (keys.length > 0) {
+                           setExpandedCinemas(prev => new Set([...prev, cum.maCumRap]));
+                         } else {
+                           setExpandedCinemas(prev => {
+                             const newSet = new Set(prev);
+                             newSet.delete(cum.maCumRap);
+                             return newSet;
+                           });
+                         }
+                       }}
+                     >
+                       <Collapse.Panel 
+                         key="movies" 
+                         header={
+                           <div className="flex items-center gap-3">
+                             <PlayCircleOutlined className="text-blue-600" />
+                             <span className="font-medium">
+                               Danh sách phim ({cum.danhSachPhim.length} phim)
+                             </span>
+                             <Tag color="blue" className="ml-auto">
+                               {cum.danhSachPhim.filter(p => p.trangThai === 'dang-chieu').length} đang chiếu
+                             </Tag>
+                           </div>
+                         }
+                         className="border-0 bg-transparent"
+                       >
+                         <div className="space-y-3 pt-4">
+                           <Suspense fallback={<Skeleton active paragraph={{ rows: 2 }} />}>
+                             {cum.danhSachPhim.map((phim, phimIndex) => (
+                               <Collapse 
+                                 key={phim.maPhim}
+                                 ghost
+                                 size="small"
+                                 className="bg-gray-50 rounded-lg border border-gray-200"
+                               >
+                                 <Collapse.Panel
+                                   key={phim.maPhim}
+                                   header={
+                                     <div className="flex items-center gap-3 w-full">
+                                       <img 
+                                         src={phim.hinhAnh} 
+                                         alt={phim.tenPhim} 
+                                         className="w-12 h-16 object-cover rounded"
+                                         onError={(e) => {
+                                           e.target.src = "https://placehold.co/120x160?text=Movie";
+                                         }}
+                                       />
+                                       <div className="flex-1 min-w-0">
+                                         <div className="font-medium text-gray-900 truncate">
+                                           {phim.tenPhim}
+                                         </div>
+                                         <div className="flex items-center gap-2 text-sm text-gray-500">
+                                           <Tag 
+                                             color={phim.trangThai === 'dang-chieu' ? 'green' : 'orange'} 
+                                             size="small"
+                                           >
+                                             {phim.trangThaiText}
+                                           </Tag>
+                                           <span>•</span>
+                                           <span>{phim.thoiLuong} phút</span>
+                                           <span>•</span>
+                                           <span>{formatDate(phim.ngayKhoiChieu)}</span>
+                                         </div>
+                                       </div>
+                                       <div className="flex items-center gap-2">
+                                         <Rate disabled defaultValue={4.2} className="text-xs" />
+                                         <Badge 
+                                           count={phim.lstLichChieuTheoPhim?.length || 0} 
+                                           size="small"
+                                           style={{ backgroundColor: '#52c41a' }}
+                                         />
+                                       </div>
+                                     </div>
+                                   }
+                                   className="border-0"
+                                 >
+                                   <div className="pt-3 pb-2">
+                                     <div className="mb-3">
+                                       <Paragraph className="text-sm text-gray-600">
+                                         {phim.moTa || 'Phim mới nhất với công nghệ chiếu phim hiện đại, âm thanh vòm sống động và hình ảnh sắc nét.'}
+                                       </Paragraph>
+                                     </div>
+                                     
+                                     {/* Lịch chiếu - chỉ hiển thị cho phim đang chiếu */}
+                                     {phim.trangThai === 'dang-chieu' && phim.lstLichChieuTheoPhim?.length > 0 && (
+                                       <div className="mb-3">
+                                         <div className="flex items-center gap-2 mb-2">
+                                           <PlayCircleOutlined className="text-blue-600" />
+                                           <Text strong className="text-sm text-gray-700">
+                                             Lịch chiếu hôm nay:
+                                           </Text>
+                                         </div>
+                                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                                           {phim.lstLichChieuTheoPhim.slice(0, 12).map((lich) => (
+                                             <Button
+                                               key={lich.maLichChieu}
+                                               size="small"
+                                               type="primary"
+                                               className="w-full h-8 text-xs font-medium hover:scale-105 transition-transform duration-200"
+                                               onClick={() => handleBooking(lich.maLichChieu)}
+                                             >
+                                               {formatTime(lich.ngayChieuGioChieu)}
+                                             </Button>
+                                           ))}
+                                           {phim.lstLichChieuTheoPhim.length > 12 && (
+                                             <Button 
+                                               size="small" 
+                                               type="link" 
+                                               className="w-full h-8"
+                                               onClick={() => navigate(`/movie/${phim.maPhim}`)}
+                                             >
+                                               +{phim.lstLichChieuTheoPhim.length - 12} nữa
+                                             </Button>
+                                           )}
+                                         </div>
+                                       </div>
+                                     )}
+                                     
+                                     {/* Thông báo cho phim sắp chiếu */}
+                                     {phim.trangThai === 'sap-chieu' && (
+                                       <div className="flex items-center justify-between">
+                                         <div className="flex items-center gap-2">
+                                           <InfoCircleOutlined className="text-orange-600" />
+                                           <Text className="text-sm text-gray-600">
+                                             Phim sẽ ra mắt vào: {formatDate(phim.ngayKhoiChieu)}
+                                           </Text>
+                                         </div>
+                                         <Button 
+                                           size="small" 
+                                           type="default" 
+                                           onClick={() => navigate(`/movie/${phim.maPhim}`)}
+                                         >
+                                           Xem chi tiết
+                                         </Button>
+                                       </div>
+                                     )}
+                                   </div>
+                                 </Collapse.Panel>
+                               </Collapse>
+                             ))}
+                           </Suspense>
+                         </div>
+                       </Collapse.Panel>
+                     </Collapse>
+                   ) : (
+                     <Empty 
+                       description="Không có phim nào đang chiếu tại rạp này" 
+                       image={Empty.PRESENTED_IMAGE_SIMPLE} 
+                     />
+                   )}
+                 </div>
               </Card>
             </div>
           ))}
