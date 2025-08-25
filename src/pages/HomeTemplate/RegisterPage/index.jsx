@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [notificationApi, contextHolder] = notification.useNotification();
   
   const onFinish = async (values) => {
+    console.log("RegisterPage onFinish called with:", values);
     try {
       setLoading(true);
       

@@ -53,6 +53,7 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data) => {
+    console.log("onSubmit called with data:", data);
     try {
       setLoading(true);
       setErrorMessage("");
@@ -72,6 +73,7 @@ export default function RegisterForm() {
     } catch (error) {
       // Xử lý lỗi
       console.error("Đăng ký thất bại:", error);
+      console.error("Error response:", error.response?.data);
       setErrorMessage(
         error.response?.data?.content || 
         "Đăng ký thất bại. Vui lòng thử lại sau."
