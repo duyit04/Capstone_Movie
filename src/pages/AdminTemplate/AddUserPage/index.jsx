@@ -200,17 +200,19 @@ export default function AddUserPage() {
         
         // Sắp xếp người dùng mới nhất lên đầu (ưu tiên người dùng mới thêm)
         const sortedUsers = normalizedUsers.sort((a, b) => {
-          // Ưu tiên 1: Sắp xếp theo taiKhoan (người dùng mới thường có taiKhoan mới hơn)
+          // Ưu tiên 1: Sắp xếp theo thời gian tạo (người dùng mới nhất lên đầu)
+          // Sử dụng taiKhoan để ước tính thứ tự thời gian
           if (a.taiKhoan && b.taiKhoan) {
             // Thử so sánh theo số nếu taiKhoan có dạng số
             const aNum = parseInt(a.taiKhoan);
             const bNum = parseInt(b.taiKhoan);
             
             if (!isNaN(aNum) && !isNaN(bNum)) {
-              // Nếu cả hai đều là số, sắp xếp theo thứ tự giảm dần
+              // Nếu cả hai đều là số, sắp xếp theo thứ tự giảm dần (số lớn hơn = mới hơn)
               return bNum - aNum;
             } else {
-              // Nếu không phải số, sắp xếp theo thứ tự alphabet ngược
+              // Nếu không phải số, sắp xếp theo thứ tự alphabet ngược (Z->A)
+              // Giả định tài khoản mới hơn có thứ tự alphabet cao hơn
               return b.taiKhoan.localeCompare(a.taiKhoan);
             }
           }
@@ -228,9 +230,16 @@ export default function AddUserPage() {
           sortedUsers.slice(0, 5).map(u => ({ 
             taiKhoan: u.taiKhoan, 
             hoTen: u.hoTen,
-            email: u.email
+            email: u.email,
+            order: 'Mới nhất' // Đánh dấu người dùng mới nhất
           }))
         );
+        
+        // Log thông tin về logic sắp xếp
+        console.log('🔄 Logic sắp xếp: Người dùng mới nhất sẽ hiển thị ở đầu danh sách');
+        console.log('📊 Tổng số người dùng:', sortedUsers.length);
+        console.log('🥇 Người dùng đầu tiên (mới nhất):', sortedUsers[0]?.taiKhoan);
+        console.log('🥈 Người dùng thứ hai:', sortedUsers[1]?.taiKhoan);
         
         setUsers(sortedUsers);
         setLastUpdated(new Date());
@@ -532,7 +541,7 @@ export default function AddUserPage() {
         console.log('📤 Dữ liệu cập nhật sẽ gửi:', updateData);
         console.log('📡 API URL:', "/QuanLyNguoiDung/CapNhatThongTinNguoiDung");
         
-        const response = await api.put("/QuanLyNguoiDung/CapNhatThongTinNguoiDung", updateData);
+        const response = await api.post("/QuanLyNguoiDung/CapNhatThongTinNguoiDung", updateData);
         
         console.log('✅ API cập nhật thành công:', response.data);
         
@@ -648,7 +657,12 @@ export default function AddUserPage() {
                      <li><strong>Loại người dùng:</strong> {values.maLoaiNguoiDung === 'QuanTri' ? 'Quản trị' : 'Khách hàng'}</li>
                    </ul>
                  </div>
-                 <p className="mt-3 text-blue-600">Người dùng mới sẽ hiển thị ở đầu danh sách!</p>
+                 <p className="mt-3 text-blue-600">
+                   <strong>🎯 Người dùng mới sẽ hiển thị ở đầu danh sách!</strong>
+                 </p>
+                 <p className="mt-2 text-gray-600 text-sm">
+                   Danh sách được sắp xếp theo thứ tự: Mới nhất → Cũ nhất
+                 </p>
                </div>
              ),
            });
@@ -698,70 +712,216 @@ export default function AddUserPage() {
 
   const columns = [
     {
-      title: "Tài khoản",
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0'
+        }}>
+          Tài khoản
+        </div>
+      ),
       dataIndex: "taiKhoan",
       key: "taiKhoan",
-      width: 150,
+      width: 180,
+      render: (text) => (
+        <div style={{
+          fontWeight: '500',
+          color: '#374151',
+          fontSize: '13px',
+          padding: '4px 8px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '6px',
+          display: 'inline-block',
+          minWidth: '80px',
+          textAlign: 'center'
+        }}>
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Họ tên",
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0'
+        }}>
+          Họ tên
+        </div>
+      ),
       dataIndex: "hoTen",
       key: "hoTen",
-      width: 200,
+      width: 220,
+      render: (text) => (
+        <div style={{
+          fontWeight: '500',
+          color: '#111827',
+          fontSize: '14px',
+          padding: '4px 0'
+        }}>
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Email",
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0'
+        }}>
+          Email
+        </div>
+      ),
       dataIndex: "email",
       key: "email",
+      width: 250,
+      render: (text) => (
+        <div style={{
+          color: '#059669',
+          fontSize: '13px',
+          padding: '4px 0',
+          wordBreak: 'break-word'
+        }}>
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Số điện thoại",
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0'
+        }}>
+          Số điện thoại
+        </div>
+      ),
       dataIndex: "soDt",
       key: "soDt",
-      width: 150,
+      width: 180,
       render: (soDt, record) => {
         // Xử lý cả hai trường soDt và soDT
         const phoneNumber = soDt || record.soDT;
         if (!phoneNumber || phoneNumber === '') {
           return (
-            <span style={{ color: '#999', fontStyle: 'italic' }}>
+            <span style={{ 
+              color: '#9ca3af', 
+              fontStyle: 'italic',
+              fontSize: '12px',
+              padding: '4px 8px',
+              backgroundColor: '#f9fafb',
+              borderRadius: '4px',
+              border: '1px dashed #d1d5db'
+            }}>
               Chưa có
             </span>
           );
         }
-        return phoneNumber;
+        return (
+          <div style={{
+            color: '#374151',
+            fontSize: '13px',
+            padding: '4px 8px',
+            backgroundColor: '#f0f9ff',
+            borderRadius: '6px',
+            border: '1px solid #e0f2fe'
+          }}>
+            {phoneNumber}
+          </div>
+        );
       },
     },
-         {
-       title: "Loại người dùng",
-       dataIndex: "maLoaiNguoiDung",
-       key: "maLoaiNguoiDung",
-       width: 150,
-       render: (type) => {
-         // Hiển thị tên tiếng Việt nhưng giữ nguyên mã gốc
-         if (type === "QuanTri") return "Quản trị";
-         if (type === "KhachHang") return "Khách hàng";
-         return type; // Hiển thị mã gốc nếu không khớp
-       },
-     },
     {
-      title: "Thao tác",
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0'
+        }}>
+          Loại người dùng
+        </div>
+      ),
+      dataIndex: "maLoaiNguoiDung",
+      key: "maLoaiNguoiDung",
+      width: 160,
+      render: (type) => {
+        const isAdmin = type === "QuanTri";
+        return (
+          <div style={{
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            textAlign: 'center',
+            backgroundColor: isAdmin ? '#fef3c7' : '#dbeafe',
+            color: isAdmin ? '#92400e' : '#1e40af',
+            border: `1px solid ${isAdmin ? '#fbbf24' : '#60a5fa'}`,
+            minWidth: '80px'
+          }}>
+            {isAdmin ? "Quản trị" : "Khách hàng"}
+          </div>
+        );
+      },
+    },
+    {
+      title: (
+        <div style={{ 
+          fontWeight: '600', 
+          color: '#1f2937',
+          fontSize: '14px',
+          padding: '8px 0',
+          textAlign: 'center'
+        }}>
+          Thao tác
+        </div>
+      ),
       key: "action",
-      width: 150,
+      width: 180,
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Button
             type="primary"
             icon={<EditOutlined />}
             onClick={() => handleEditUser(record)}
-          />
+            size="small"
+            style={{
+              borderRadius: '6px',
+              height: '32px',
+              padding: '0 12px',
+              fontSize: '12px',
+              fontWeight: '500'
+            }}
+          >
+            Sửa
+          </Button>
           <Popconfirm
             title="Bạn có chắc muốn xóa người dùng này?"
             onConfirm={() => handleDeleteUser(record.taiKhoan)}
             okText="Xóa"
             cancelText="Hủy"
+            placement="top"
           >
-            <Button danger icon={<DeleteOutlined />} />
+            <Button 
+              danger 
+              icon={<DeleteOutlined />} 
+              size="small"
+              style={{
+                borderRadius: '6px',
+                height: '32px',
+                padding: '0 12px',
+                fontSize: '12px',
+                fontWeight: '500'
+              }}
+            >
+              Xóa
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -769,91 +929,232 @@ export default function AddUserPage() {
   ];
 
   return (
-    <div>
+    <div style={{ padding: '24px', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       {contextHolder} {/* Đặt contextHolder để hiển thị notification */}
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 24, marginBottom: 8 }}>Quản lý Người dùng</h1>
-        <p style={{ color: '#666', fontSize: 14, margin: 0 }}>
-          📍 Người dùng mới đăng ký sẽ hiển thị ở trên cùng
-          <span style={{ marginLeft: 16, color: '#1890ff' }}>
-            • Tổng: {users.length} người dùng
-          </span>
+      <div style={{ 
+        marginBottom: 24, 
+        backgroundColor: 'white', 
+        padding: '24px', 
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h1 style={{ 
+          fontSize: '28px', 
+          marginBottom: '16px', 
+          color: '#1f2937',
+          fontWeight: '700',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          👥 Quản lý Người dùng
+        </h1>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '16px', 
+          alignItems: 'center',
+          padding: '16px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            padding: '8px 16px',
+            backgroundColor: '#fef3c7',
+            borderRadius: '20px',
+            border: '1px solid #fbbf24'
+          }}>
+            📍 <strong style={{ color: '#92400e' }}>Người dùng mới nhất sẽ hiển thị ở đầu danh sách</strong>
+          </div>
+          <div style={{ 
+            padding: '8px 16px',
+            backgroundColor: '#dbeafe',
+            borderRadius: '20px',
+            border: '1px solid #60a5fa',
+            color: '#1e40af',
+            fontWeight: '500'
+          }}>
+            👥 Tổng: <strong>{users.length}</strong> người dùng
+          </div>
           {lastUpdated && (
-            <span style={{ marginLeft: 16, color: '#52c41a' }}>
-              • Cập nhật lúc: {lastUpdated.toLocaleTimeString('vi-VN')}
-            </span>
+            <div style={{ 
+              padding: '8px 16px',
+              backgroundColor: '#dcfce7',
+              borderRadius: '20px',
+              border: '1px solid #4ade80',
+              color: '#166534',
+              fontWeight: '500'
+            }}>
+              ⏰ Cập nhật lúc: <strong>{lastUpdated.toLocaleTimeString('vi-VN')}</strong>
+            </div>
           )}
-        </p>
+                     <div style={{ 
+             padding: '8px 16px',
+             backgroundColor: '#f3e8ff',
+             borderRadius: '20px',
+             border: '1px solid #a78bfa',
+             color: '#7c3aed',
+             fontWeight: '500'
+           }}>
+             🔄 Sắp xếp: Mới nhất → Cũ nhất
+           </div>
+        </div>
       </div>
       
-      
-      
-      <div style={{ marginBottom: 16, display: "flex" }}>
-        <Space>
-          <Input
-            placeholder="Tìm kiếm theo tài khoản hoặc họ tên"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={handleSearch}
-            style={{ width: 300 }}
-          />
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-            Tìm kiếm
+      <div style={{ 
+        marginBottom: 24, 
+        backgroundColor: 'white', 
+        padding: '20px', 
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '16px', 
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '12px', 
+            alignItems: 'center'
+          }}>
+            <Input
+              placeholder="🔍 Tìm kiếm theo tài khoản hoặc họ tên..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onPressEnter={handleSearch}
+              style={{ 
+                width: 350,
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                padding: '8px 16px',
+                fontSize: '14px'
+              }}
+              prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+            />
+            <Button 
+              type="primary" 
+              icon={<SearchOutlined />} 
+              onClick={handleSearch}
+              style={{
+                borderRadius: '8px',
+                height: '40px',
+                padding: '0 20px',
+                fontSize: '14px',
+                fontWeight: '500',
+                backgroundColor: '#3b82f6',
+                border: 'none',
+                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
+              }}
+            >
+              Tìm kiếm
+            </Button>
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={() => {
+                console.log('🔄 Manual refresh danh sách người dùng...');
+                message.loading({
+                  content: 'Đang refresh danh sách người dùng...',
+                  duration: 0,
+                  key: 'refreshUsers'
+                });
+                fetchUsers().then(() => {
+                  message.destroy('refreshUsers');
+                  message.success({
+                    content: '🔄 Đã refresh danh sách người dùng thành công!',
+                    duration: 3,
+                    style: {
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                    },
+                  });
+                  notificationApi.success({
+                    message: 'Refresh thành công',
+                    description: `Danh sách người dùng đã được cập nhật. Tổng: ${users.length} người dùng.`,
+                    placement: 'topRight',
+                    icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+                    duration: 5
+                  });
+                }).catch((error) => {
+                  message.destroy('refreshUsers');
+                  message.error('Không thể refresh danh sách người dùng!');
+                  console.error('❌ Lỗi khi refresh:', error);
+                });
+              }}
+              title="Refresh danh sách người dùng"
+              style={{
+                borderRadius: '8px',
+                height: '40px',
+                padding: '0 20px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: '1px solid #d1d5db',
+                color: '#374151',
+                backgroundColor: 'white'
+              }}
+            >
+              🔄 Refresh
+            </Button>
+          </div>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAddUser}
+            style={{ 
+              borderRadius: '8px',
+              height: '40px',
+              padding: '0 24px',
+              fontSize: '14px',
+              fontWeight: '600',
+              backgroundColor: '#10b981',
+              border: 'none',
+              boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+            }}
+          >
+            ➕ Thêm người dùng
           </Button>
-                     <Button 
-             icon={<ReloadOutlined />} 
-             onClick={() => {
-               console.log('🔄 Manual refresh danh sách người dùng...');
-               message.loading({
-                 content: 'Đang refresh danh sách người dùng...',
-                 duration: 0,
-                 key: 'refreshUsers'
-               });
-               fetchUsers().then(() => {
-                 message.destroy('refreshUsers');
-                 message.success({
-                   content: '🔄 Đã refresh danh sách người dùng thành công!',
-                   duration: 3,
-                   style: {
-                     fontSize: '14px',
-                     fontWeight: 'bold',
-                   },
-                 });
-                 notificationApi.success({
-                   message: 'Refresh thành công',
-                   description: `Danh sách người dùng đã được cập nhật. Tổng: ${users.length} người dùng.`,
-                   placement: 'topRight',
-                   icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-                   duration: 5
-                 });
-               }).catch((error) => {
-                 message.destroy('refreshUsers');
-                 message.error('Không thể refresh danh sách người dùng!');
-                 console.error('❌ Lỗi khi refresh:', error);
-               });
-             }}
-             title="Refresh danh sách người dùng"
-           >
-             Refresh
-           </Button>
-        </Space>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAddUser}
-          style={{ marginLeft: "auto" }}
-        >
-          Thêm người dùng
-        </Button>
+        </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={users}
-        rowKey="taiKhoan"
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-      />
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden'
+      }}>
+        <Table
+          columns={columns}
+          dataSource={users}
+          rowKey="taiKhoan"
+          loading={loading}
+          pagination={{ 
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} người dùng`,
+            size: 'default'
+          }}
+          className="user-management-table"
+          rowClassName={(record, index) => 
+            index % 2 === 0 ? 'table-row-even' : 'table-row-odd'
+          }
+          scroll={{ x: 1200 }}
+          style={{
+            margin: 0
+          }}
+          tableLayout="fixed"
+        />
+      </div>
 
       <Modal
         title={editingUser ? "Cập nhật người dùng" : "Thêm người dùng mới"}
